@@ -1,0 +1,117 @@
+schemaVersion: 1
+kind: sdkwork.database.contract
+moduleId: github
+tables:
+  - name: github_repository
+    columns:
+      - name: id
+        type: string
+        primaryKey: true
+      - name: tenant_id
+        type: string
+        nullable: false
+      - name: organization_id
+        type: string
+        nullable: false
+      - name: full_name
+        type: string
+        nullable: false
+      - name: owner
+        type: string
+        nullable: false
+      - name: description
+        type: string
+      - name: default_branch
+        type: string
+      - name: html_url
+        type: string
+      - name: is_private
+        type: boolean
+        nullable: false
+      - name: created_at
+        type: timestamp
+        nullable: false
+      - name: updated_at
+        type: timestamp
+        nullable: false
+  - name: github_issue
+    columns:
+      - name: id
+        type: string
+        primaryKey: true
+      - name: tenant_id
+        type: string
+        nullable: false
+      - name: organization_id
+        type: string
+        nullable: false
+      - name: repository_id
+        type: string
+        nullable: false
+      - name: number
+        type: integer
+        nullable: false
+      - name: title
+        type: string
+        nullable: false
+      - name: state
+        type: string
+        nullable: false
+      - name: html_url
+        type: string
+      - name: created_at
+        type: timestamp
+        nullable: false
+      - name: updated_at
+        type: timestamp
+        nullable: false
+  - name: github_plan
+    columns:
+      - name: id
+        type: string
+        primaryKey: true
+      - name: tenant_id
+        type: string
+        nullable: false
+      - name: organization_id
+        type: string
+        nullable: false
+      - name: repository_id
+        type: string
+      - name: title
+        type: string
+        nullable: false
+      - name: status
+        type: string
+        nullable: false
+      - name: created_at
+        type: timestamp
+        nullable: false
+      - name: updated_at
+        type: timestamp
+        nullable: false
+  - name: github_plan_item
+    columns:
+      - name: id
+        type: string
+        primaryKey: true
+      - name: plan_id
+        type: string
+        nullable: false
+      - name: title
+        type: string
+        nullable: false
+      - name: status
+        type: string
+        nullable: false
+      - name: sort_order
+        type: integer
+        nullable: false
+      - name: issue_id
+        type: string
+      - name: created_at
+        type: timestamp
+        nullable: false
+      - name: updated_at
+        type: timestamp
+        nullable: false

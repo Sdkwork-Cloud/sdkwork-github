@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.http.route-manifest",
+  "apiSurface": "app-api",
+  "domain": "github",
+  "crate": "sdkwork-router-github-app-api",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/app/v3/api/github/repositories",
+      "operationId": "repositories.list",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/github/issues",
+      "operationId": "issues.list",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/github/plans",
+      "operationId": "plans.list",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    }
+  ]
+}

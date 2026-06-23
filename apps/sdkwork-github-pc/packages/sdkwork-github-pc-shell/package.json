@@ -1,0 +1,13 @@
+{
+  "name": "@sdkwork/github-pc-shell",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/App.tsx"
+  },
+  "dependencies": {
+    "@sdkwork/github-pc-core": "workspace:*",
+    "react": "^19.1.0"
+  }
+}

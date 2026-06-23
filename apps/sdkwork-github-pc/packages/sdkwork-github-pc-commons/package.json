@@ -1,0 +1,12 @@
+{
+  "name": "@sdkwork/github-pc-commons",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./utils/text": "./src/utils/text.ts"
+  },
+  "dependencies": {
+    "@sdkwork/utils": "workspace:*"
+  }
+}

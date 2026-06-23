@@ -1,0 +1,12 @@
+[package]
+name = "sdkwork-github-integration-repository-sqlx"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+chrono.workspace = true
+serde.workspace = true
+sqlx.workspace = true
+sdkwork-github-integration-service.workspace = true
+sdkwork-database-config.workspace = true

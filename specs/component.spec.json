@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-github",
+    "displayName": "SDKWork GitHub",
+    "version": "0.1.0",
+    "type": "product-workspace",
+    "root": "sdkwork-github",
+    "domain": "github",
+    "capability": "integration",
+    "surface": "workspace",
+    "languages": ["rust", "typescript"],
+    "generated": false,
+    "private": false,
+    "manifests": ["Cargo.toml", "package.json", "sdkwork.workflow.json", "specs/topology.spec.json"]
+  },
+  "canonicalSpecs": [
+    { "file": "README.md", "path": "../sdkwork-specs/README.md", "purpose": "SDKWork root standards entrypoint." },
+    { "file": "WEB_FRAMEWORK_SPEC.md", "path": "../sdkwork-specs/WEB_FRAMEWORK_SPEC.md", "purpose": "Mandatory sdkwork-web-framework integration." },
+    { "file": "DATABASE_FRAMEWORK_SPEC.md", "path": "../sdkwork-specs/DATABASE_FRAMEWORK_SPEC.md", "purpose": "Database lifecycle and SPI." },
+    { "file": "DEPLOYMENT_SPEC.md", "path": "../sdkwork-specs/DEPLOYMENT_SPEC.md", "purpose": "Deployment profile parity." },
+    { "file": "GITHUB_WORKFLOW_SPEC.md", "path": "../sdkwork-specs/GITHUB_WORKFLOW_SPEC.md", "purpose": "Packaging workflow." },
+    { "file": "TEST_SPEC.md", "path": "../sdkwork-specs/TEST_SPEC.md", "purpose": "Verification evidence." }
+  ],
+  "contracts": {
+    "publicExports": [],
+    "runtimeEntrypoints": ["crates/sdkwork-github-api-server", "apps/sdkwork-github-pc"],
+    "routeManifest": "sdks/_route-manifests/app-api/sdkwork-router-github-app-api.route-manifest.json",
+    "sdkClients": [],
+    "sdkDependencies": [
+      { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" }
+    ],
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [
+      { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "runtimeMode": "embedded-or-split" }
+    ],
+    "events": [],
+    "configKeys": ["specs/topology.spec.json", "configs/topology/*.env"]
+  },
+  "integration": {
+    "webFramework": "Rust HTTP runtimes integrate sdkwork-web-framework through sdkwork-web-axum and sdkwork-iam-web-adapter.",
+    "database": "API server resolves SDKWORK_GITHUB database config through sdkwork-database-config; repository crate uses sqlx with database/ migrations.",
+    "utils": "Rust route crates and integration-service use sdkwork-utils-rust; PC commons re-exports @sdkwork/utils.",
+    "discovery": "Not required until RPC services are introduced."
+  },
+  "verification": {
+    "commands": ["pnpm verify", "node --test scripts/verify-github-standard-architecture.test.mjs"]
+  },
+  "metadata": {
+    "managedBy": "sdkwork-github-standard-alignment",
+    "standardVersion": "2026-06-23"
+  }
+}

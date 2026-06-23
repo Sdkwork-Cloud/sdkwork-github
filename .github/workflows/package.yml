@@ -1,0 +1,25 @@
+name: Package Application
+
+on:
+  push:
+    tags: [v*, '*.*.*']
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+  id-token: write
+  attestations: write
+
+jobs:
+  package:
+    uses: Sdkwork-Cloud/sdkwork-github-workflow/.github/workflows/sdkwork-package.yml@b0829529b9277a3da32b90c2d36ff34ff09fa832
+    with:
+      config_path: sdkwork.workflow.json
+      tag: ${{ github.event.inputs.tag || github.event.release.tag_name || github.ref_name }}
+      publish_release: true
+      upload_artifact: true
+      framework_ref: b0829529b9277a3da32b90c2d36ff34ff09fa832
+    secrets: inherit

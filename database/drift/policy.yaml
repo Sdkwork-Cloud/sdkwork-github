@@ -1,0 +1,7 @@
+schemaVersion: 1
+kind: sdkwork.database.drift-policy
+moduleId: github
+rules:
+  - id: table-registry-parity
+    severity: error
+    description: Runtime tables must match contract/table-registry.json

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 3,
+  "kind": "sdkwork.app",
+  "app": {
+    "key": "sdkwork-github",
+    "name": "SDKWork GitHub",
+    "displayName": "SDKWork GitHub",
+    "description": "GitHub integration for repositories, issues, and planning.",
+    "vendor": "SDKWork",
+    "officialWebsiteUrl": "https://sdkwork.com/apps/sdkwork-github",
+    "appType": "APP_REACT",
+    "versionSource": "package.json"
+  },
+  "runtime": {
+    "family": "browser",
+    "framework": "react",
+    "runtimes": ["WEB"],
+    "deliveryModes": ["WEB_URL"],
+    "supportedDeploymentProfiles": ["standalone", "cloud"],
+    "defaultDeploymentProfile": "standalone"
+  },
+  "sdkDependencies": [
+    { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" }
+  ],
+  "dependencyApiExports": [],
+  "dependencyApiSurfaces": [
+    { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "runtimeMode": "embedded-or-split" }
+  ]
+}

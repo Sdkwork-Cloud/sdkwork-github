@@ -1,0 +1,64 @@
+{
+  "$schema": "../sdkwork-github-workflow/schemas/sdkwork-workflow.schema.json",
+  "schemaVersion": "2026-06-06.sdkwork.workflow.v1",
+  "app": {
+    "id": "sdkwork-github",
+    "name": "SDKWork GitHub",
+    "repository": "Sdkwork-Cloud/sdkwork-github",
+    "sourcePath": "apps/sdkwork-github-pc",
+    "configPath": "apps/sdkwork-github-pc/sdkwork.app.config.json"
+  },
+  "release": {
+    "artifactPrefix": "sdkwork-github",
+    "defaultVersion": "0.1.0",
+    "changelog": { "source": "auto", "maxCommitSubjects": 50 }
+  },
+  "toolchains": {
+    "node": "22",
+    "pnpm": "10.30.2",
+    "rust": "stable"
+  },
+  "lifecycle": {
+    "preflight": [],
+    "install": [
+      {
+        "name": "Install workspace dependencies",
+        "shell": "pwsh",
+        "run": "pnpm install --frozen-lockfile || pnpm install"
+      }
+    ],
+    "build": [
+      {
+        "name": "Verify workspace",
+        "shell": "pwsh",
+        "run": "pnpm check"
+      }
+    ],
+    "package": [
+      {
+        "name": "Build web package",
+        "shell": "pwsh",
+        "run": "pnpm --dir apps/sdkwork-github-pc build"
+      }
+    ],
+    "sign": [],
+    "sbom": [],
+    "validate": [
+      {
+        "name": "Run verification",
+        "shell": "pwsh",
+        "run": "pnpm verify"
+      }
+    ]
+  },
+  "targets": [
+    {
+      "id": "web-standalone-browser-x64",
+      "platform": "web",
+      "architecture": "x64",
+      "profile": "standalone-browser",
+      "format": "zip",
+      "outputGlobs": ["apps/sdkwork-github-pc/dist/**"]
+    }
+  ]
+}

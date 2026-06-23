@@ -1,0 +1,8 @@
+{
+  "openapi": "3.1.2",
+  "info": {
+    "title": "SDKWork GitHub Open API",
+    "version": "0.1.0"
+  },
+  "paths": {}
+}

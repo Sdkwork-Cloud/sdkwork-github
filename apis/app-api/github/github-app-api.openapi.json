@@ -1,0 +1,229 @@
+{
+  "openapi": "3.1.2",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "SDKWork GitHub App API",
+    "version": "0.1.0",
+    "description": "GitHub integration app API for repositories, issues, and planning."
+  },
+  "servers": [
+    {
+      "url": "/app/v3/api",
+      "description": "SDKWork App API root"
+    }
+  ],
+  "tags": [
+    {
+      "name": "github",
+      "description": "GitHub integration resources."
+    }
+  ],
+  "paths": {
+    "/app/v3/api/github/repositories": {
+      "get": {
+        "summary": "List tracked GitHub repositories.",
+        "operationId": "repositories.list",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" },
+          { "$ref": "#/components/parameters/PageQuery" },
+          { "$ref": "#/components/parameters/PageSizeQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Repository page.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RepositoryPage" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "repositories",
+        "x-sdkwork-permission": "github.repositories.read",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    },
+    "/app/v3/api/github/issues": {
+      "get": {
+        "summary": "List GitHub issues.",
+        "operationId": "issues.list",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" },
+          { "$ref": "#/components/parameters/PageQuery" },
+          { "$ref": "#/components/parameters/PageSizeQuery" },
+          {
+            "name": "repository_id",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Issue page.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IssuePage" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "issues",
+        "x-sdkwork-permission": "github.issues.read",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    },
+    "/app/v3/api/github/plans": {
+      "get": {
+        "summary": "List feature plans and checklists.",
+        "operationId": "plans.list",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" },
+          { "$ref": "#/components/parameters/PageQuery" },
+          { "$ref": "#/components/parameters/PageSizeQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan page.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PlanPage" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "plans",
+        "x-sdkwork-permission": "github.plans.read",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "TenantIdQuery": {
+        "name": "tenant_id",
+        "in": "query",
+        "schema": { "type": "string" }
+      },
+      "OrganizationIdQuery": {
+        "name": "organization_id",
+        "in": "query",
+        "schema": { "type": "string" }
+      },
+      "PageQuery": {
+        "name": "page",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "PageSizeQuery": {
+        "name": "page_size",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+      }
+    },
+    "schemas": {
+      "RepositoryPage": {
+        "type": "object",
+        "required": ["items", "page", "page_size", "total"],
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Repository" } },
+          "page": { "type": "integer" },
+          "page_size": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      },
+      "Repository": {
+        "type": "object",
+        "required": ["id", "full_name", "owner", "is_private"],
+        "properties": {
+          "id": { "type": "string" },
+          "full_name": { "type": "string" },
+          "owner": { "type": "string" },
+          "description": { "type": "string" },
+          "default_branch": { "type": "string" },
+          "html_url": { "type": "string" },
+          "is_private": { "type": "boolean" }
+        }
+      },
+      "IssuePage": {
+        "type": "object",
+        "required": ["items", "page", "page_size", "total"],
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Issue" } },
+          "page": { "type": "integer" },
+          "page_size": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      },
+      "Issue": {
+        "type": "object",
+        "required": ["id", "repository_id", "number", "title", "state"],
+        "properties": {
+          "id": { "type": "string" },
+          "repository_id": { "type": "string" },
+          "number": { "type": "integer" },
+          "title": { "type": "string" },
+          "state": { "type": "string" },
+          "html_url": { "type": "string" }
+        }
+      },
+      "PlanPage": {
+        "type": "object",
+        "required": ["items", "page", "page_size", "total"],
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Plan" } },
+          "page": { "type": "integer" },
+          "page_size": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      },
+      "Plan": {
+        "type": "object",
+        "required": ["id", "title", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string" },
+          "repository_id": { "type": "string" }
+        }
+      }
+    },
+    "responses": {
+      "ProblemDetailResponse": {
+        "description": "Problem Details",
+        "content": {
+          "application/problem+json": {
+            "schema": { "type": "object" }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "AuthToken": { "type": "http", "scheme": "bearer" },
+      "AccessToken": { "type": "apiKey", "in": "header", "name": "Access-Token" }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+name: verify
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install PC workspace dependencies
+        working-directory: apps/sdkwork-github-pc
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify workspace
+        run: pnpm verify

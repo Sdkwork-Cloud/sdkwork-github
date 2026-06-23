@@ -1,10 +1,21 @@
+use axum::routing::{get, post};
 use axum::Router;
-use sdkwork_github_integration_service::ports::GitHubStore;
+use sdkwork_github_integration_service::ports::GitHubSyncStore;
 use sdkwork_github_integration_service::GitHubIntegrationService;
 
-pub fn build_router<S>(_: GitHubIntegrationService<S>) -> Router
+use crate::handlers;
+use crate::paths;
+use crate::state::GitHubBackendState;
+
+pub fn build_router<S>(service: GitHubIntegrationService<S>) -> Router
 where
-    S: GitHubStore + Clone + Send + Sync + 'static,
+    S: GitHubSyncStore + Clone + Send + Sync + 'static,
 {
     Router::new()
+        .route(paths::INTEGRATIONS, get(handlers::list_integrations::<S>))
+        .route(
+            paths::INTEGRATIONS_SYNC,
+            post(handlers::sync_integration_repositories::<S>),
+        )
+        .with_state(GitHubBackendState::new(service))
 }

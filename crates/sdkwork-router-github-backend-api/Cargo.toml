@@ -9,6 +9,8 @@ path = "src/lib.rs"
 
 [dependencies]
 axum.workspace = true
+http.workspace = true
+serde.workspace = true
 sdkwork-github-integration-service.workspace = true
 sdkwork-web-core.workspace = true
 sdkwork-web-axum.workspace = true

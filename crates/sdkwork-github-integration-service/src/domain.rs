@@ -49,3 +49,60 @@ pub struct Page<T> {
     pub page_size: u32,
     pub total: u64,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SyncResult {
+    pub provider: String,
+    pub synced_count: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProviderAccount {
+    pub id: String,
+    pub tenant_id: String,
+    pub organization_id: String,
+    pub provider: String,
+    pub external_account_id: Option<String>,
+    pub access_token_cipher: String,
+    pub scopes: Option<String>,
+    pub status: String,
+    pub last_synced_at: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IntegrationStatus {
+    pub provider: String,
+    pub linked: bool,
+    pub status: Option<String>,
+    pub external_account_id: Option<String>,
+    pub scopes: Option<String>,
+    pub last_synced_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LinkIntegrationCommand {
+    pub access_token: String,
+    pub external_account_id: Option<String>,
+    pub scopes: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuthBeginResult {
+    pub provider: String,
+    pub authorization_url: String,
+    pub state: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdminIntegrationView {
+    pub tenant_id: String,
+    pub organization_id: String,
+    pub provider: String,
+    pub linked: bool,
+    pub status: Option<String>,
+    pub external_account_id: Option<String>,
+    pub scopes: Option<String>,
+    pub last_synced_at: Option<DateTime<Utc>>,
+}

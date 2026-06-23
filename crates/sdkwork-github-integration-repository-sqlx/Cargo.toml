@@ -8,5 +8,7 @@ async-trait.workspace = true
 chrono.workspace = true
 serde.workspace = true
 sqlx.workspace = true
+uuid.workspace = true
 sdkwork-github-integration-service.workspace = true
 sdkwork-database-config.workspace = true
+sdkwork-database-sqlx.workspace = true

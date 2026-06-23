@@ -25,6 +25,12 @@
       "owner": "github-platform",
       "compliance_level": "L2",
       "lifecycle_status": "active"
+    },
+    {
+      "table_name": "github_provider_account",
+      "owner": "github-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
     }
   ]
 }

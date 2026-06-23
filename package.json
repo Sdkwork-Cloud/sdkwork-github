@@ -10,18 +10,22 @@
   "scripts": {
     "dev": "node scripts/github-dev.mjs --runtime-target browser --database sqlite --service-layout unified-process --deployment-profile standalone",
     "build": "cargo build --workspace",
-    "test": "pnpm topology:validate && pnpm test:contracts",
-    "check": "cargo check --workspace && pnpm check:pnpm-script-standard && pnpm check:architecture-alignment && pnpm topology:validate && pnpm db:validate && pnpm api:check",
+    "test": "pnpm topology:validate && pnpm test:contracts && pnpm test:contract:database",
+    "check": "cargo check --workspace && pnpm check:pnpm-script-standard && pnpm check:architecture-alignment && pnpm topology:validate && pnpm db:validate && pnpm api:materialize:check && pnpm sdk:generate:check && pnpm api:check && pnpm typecheck",
     "verify": "cargo test --workspace && pnpm test",
+    "typecheck": "pnpm --dir apps/sdkwork-github-pc typecheck",
     "clean": "cargo clean",
     "check:pnpm-script-standard": "node ../sdkwork-specs/tools/check-pnpm-script-standard.mjs --root . --application-code-prefix github",
     "check:architecture-alignment": "node --test scripts/verify-github-standard-architecture.test.mjs",
+    "api:materialize": "node tools/github_api_materialize.mjs",
+    "api:materialize:check": "node tools/github_api_materialize.mjs --check",
     "api:check": "node tools/github_sdk_generate.mjs --check",
     "sdk:check": "node tools/github_sdk_generate.mjs --check",
     "sdk:generate": "node tools/github_sdk_generate.mjs",
+    "sdk:generate:check": "node tools/github_sdk_generate.mjs --check",
     "topology:validate": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs validate --root . --spec specs/topology.spec.json",
     "test:contracts": "node --test scripts/verify-github-standard-architecture.test.mjs",
-    "db:validate": "node ../sdkwork-specs/tools/check-database-framework-standard.mjs --root .",
+    "db:validate": "node --test scripts/verify-github-database-framework.test.mjs",
     "db:plan": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . plan",
     "db:init": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . init",
     "db:migrate": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . migrate",
@@ -29,6 +33,8 @@
     "db:status": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . status",
     "db:drift": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . drift",
     "db:drift:check": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . drift-check",
-    "db:bootstrap": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . bootstrap"
+    "db:bootstrap": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . bootstrap",
+    "db:materialize:contract": "node ../sdkwork-specs/tools/materialize-database-contract-from-baseline.mjs --root . --baseline database/ddl/baseline/sqlite/0001_github_legacy_baseline.sql --module-id github --owner github-platform --prefixes github_ --engines sqlite,postgres",
+    "test:contract:database": "node --test scripts/verify-github-database-framework.test.mjs"
   }
 }

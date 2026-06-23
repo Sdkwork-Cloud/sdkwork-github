@@ -27,7 +27,7 @@
     "publicExports": [],
     "runtimeEntrypoints": ["crates/sdkwork-github-api-server", "apps/sdkwork-github-pc"],
     "routeManifest": "sdks/_route-manifests/app-api/sdkwork-router-github-app-api.route-manifest.json",
-    "sdkClients": [],
+    "sdkClients": ["@sdkwork/github-app-sdk"],
     "sdkDependencies": [
       { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" }
     ],

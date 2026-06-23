@@ -51,6 +51,36 @@
         "x-sdkwork-api-surface": "app-api"
       }
     },
+    "/app/v3/api/github/repositories/sync": {
+      "post": {
+        "summary": "Sync repositories from GitHub.",
+        "operationId": "repositories.sync",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sync result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SyncResult" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "repositories",
+        "x-sdkwork-permission": "github.repositories.sync",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    },
     "/app/v3/api/github/issues": {
       "get": {
         "summary": "List GitHub issues.",
@@ -88,6 +118,41 @@
         "x-sdkwork-api-surface": "app-api"
       }
     },
+    "/app/v3/api/github/issues/sync": {
+      "post": {
+        "summary": "Sync issues from GitHub.",
+        "operationId": "issues.sync",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" },
+          {
+            "name": "repository_id",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sync result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SyncResult" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "issues",
+        "x-sdkwork-permission": "github.issues.sync",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    },
     "/app/v3/api/github/plans": {
       "get": {
         "summary": "List feature plans and checklists.",
@@ -116,6 +181,100 @@
         "x-sdkwork-domain": "github",
         "x-sdkwork-resource": "plans",
         "x-sdkwork-permission": "github.plans.read",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    },
+    "/app/v3/api/github/integration": {
+      "get": {
+        "summary": "Get GitHub integration link status.",
+        "operationId": "integration.status",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integration status.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntegrationStatus" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "integration",
+        "x-sdkwork-permission": "github.integration.read",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      },
+      "post": {
+        "summary": "Link GitHub integration credentials for the current tenant scope.",
+        "operationId": "integration.link",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LinkIntegrationRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Integration status after linking.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntegrationStatus" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "integration",
+        "x-sdkwork-permission": "github.integration.link",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      },
+      "delete": {
+        "summary": "Revoke linked GitHub integration credentials.",
+        "operationId": "integration.unlink",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integration status after unlinking.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntegrationStatus" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "integration",
+        "x-sdkwork-permission": "github.integration.unlink",
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "app-api"
       }
@@ -208,6 +367,35 @@
           "title": { "type": "string" },
           "status": { "type": "string" },
           "repository_id": { "type": "string" }
+        }
+      },
+      "SyncResult": {
+        "type": "object",
+        "required": ["provider", "synced_count"],
+        "properties": {
+          "provider": { "type": "string" },
+          "synced_count": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "IntegrationStatus": {
+        "type": "object",
+        "required": ["provider", "linked"],
+        "properties": {
+          "provider": { "type": "string" },
+          "linked": { "type": "boolean" },
+          "status": { "type": "string" },
+          "external_account_id": { "type": "string" },
+          "scopes": { "type": "string" },
+          "last_synced_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LinkIntegrationRequest": {
+        "type": "object",
+        "required": ["access_token"],
+        "properties": {
+          "access_token": { "type": "string" },
+          "external_account_id": { "type": "string" },
+          "scopes": { "type": "string" }
         }
       }
     },

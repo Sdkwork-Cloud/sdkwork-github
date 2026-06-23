@@ -20,7 +20,8 @@
     "defaultDeploymentProfile": "standalone"
   },
   "sdkDependencies": [
-    { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" }
+    { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" },
+    { "sdkFamily": "sdkwork-github-app-sdk", "surface": "app-api", "owner": "sdkwork-github" }
   ],
   "dependencyApiExports": [],
   "dependencyApiSurfaces": [

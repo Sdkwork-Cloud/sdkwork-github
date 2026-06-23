@@ -1,11 +1,16 @@
 use axum::extract::{Query, State};
+use axum::response::Redirect;
 use axum::Json;
 use http::StatusCode;
-use sdkwork_github_integration_service::ports::GitHubStore;
+use sdkwork_github_integration_service::error::ServiceError;
+use sdkwork_github_integration_service::ports::GitHubSyncStore;
 use sdkwork_utils_rust::string::is_blank;
 use sdkwork_web_core::WebRequestContext;
 
-use crate::dto::{IssuePageResponse, PageQuery, PlanPageResponse, RepositoryPageResponse};
+use crate::dto::{
+    IntegrationStatusResponse, IssuePageResponse, LinkIntegrationRequest, OAuthBeginResponse,
+    OAuthCallbackQuery, PageQuery, PlanPageResponse, RepositoryPageResponse, SyncResponse,
+};
 use crate::state::GitHubAppState;
 
 type ApiResult<T> = Result<T, (StatusCode, String)>;
@@ -35,7 +40,16 @@ fn resolve_scope(
     Ok((tenant_id, organization_id))
 }
 
-pub async fn list_repositories<S: GitHubStore>(
+fn map_service_error(error: ServiceError) -> (StatusCode, String) {
+    match error {
+        ServiceError::Validation(message) => (StatusCode::BAD_REQUEST, message),
+        ServiceError::Configuration(message) => (StatusCode::SERVICE_UNAVAILABLE, message),
+        ServiceError::Integration(message) => (StatusCode::BAD_GATEWAY, message),
+        ServiceError::Repository(message) => (StatusCode::INTERNAL_SERVER_ERROR, message),
+    }
+}
+
+pub async fn list_repositories<S: GitHubSyncStore>(
     State(state): State<GitHubAppState<S>>,
     app_ctx: WebRequestContext,
     Query(query): Query<PageQuery>,
@@ -47,11 +61,25 @@ pub async fn list_repositories<S: GitHubStore>(
         .service
         .list_repositories(&tenant_id, &organization_id, page, page_size)
         .await
-        .map_err(|error| (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()))?;
+        .map_err(map_service_error)?;
     Ok(Json(result.into()))
 }
 
-pub async fn list_issues<S: GitHubStore>(
+pub async fn sync_repositories<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    app_ctx: WebRequestContext,
+    Query(query): Query<PageQuery>,
+) -> ApiResult<Json<SyncResponse>> {
+    let (tenant_id, organization_id) = resolve_scope(&app_ctx, &query)?;
+    let result = state
+        .service
+        .sync_repositories(&tenant_id, &organization_id)
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn list_issues<S: GitHubSyncStore>(
     State(state): State<GitHubAppState<S>>,
     app_ctx: WebRequestContext,
     Query(query): Query<PageQuery>,
@@ -70,11 +98,26 @@ pub async fn list_issues<S: GitHubStore>(
             page_size,
         )
         .await
-        .map_err(|error| (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()))?;
+        .map_err(map_service_error)?;
     Ok(Json(result.into()))
 }
 
-pub async fn list_plans<S: GitHubStore>(
+pub async fn sync_issues<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    app_ctx: WebRequestContext,
+    Query(query): Query<PageQuery>,
+) -> ApiResult<Json<SyncResponse>> {
+    let (tenant_id, organization_id) = resolve_scope(&app_ctx, &query)?;
+    let repository_id = query.repository_id.as_deref();
+    let result = state
+        .service
+        .sync_issues(&tenant_id, &organization_id, repository_id)
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn list_plans<S: GitHubSyncStore>(
     State(state): State<GitHubAppState<S>>,
     app_ctx: WebRequestContext,
     Query(query): Query<PageQuery>,
@@ -86,6 +129,84 @@ pub async fn list_plans<S: GitHubStore>(
         .service
         .list_plans(&tenant_id, &organization_id, page, page_size)
         .await
-        .map_err(|error| (StatusCode::INTERNAL_SERVER_ERROR, error.to_string()))?;
+        .map_err(map_service_error)?;
     Ok(Json(result.into()))
+}
+
+pub async fn get_integration_status<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    app_ctx: WebRequestContext,
+    Query(query): Query<PageQuery>,
+) -> ApiResult<Json<IntegrationStatusResponse>> {
+    let (tenant_id, organization_id) = resolve_scope(&app_ctx, &query)?;
+    let result = state
+        .service
+        .get_integration_status(&tenant_id, &organization_id)
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn link_integration<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    app_ctx: WebRequestContext,
+    Query(query): Query<PageQuery>,
+    Json(body): Json<LinkIntegrationRequest>,
+) -> ApiResult<Json<IntegrationStatusResponse>> {
+    let (tenant_id, organization_id) = resolve_scope(&app_ctx, &query)?;
+    let result = state
+        .service
+        .link_integration(&tenant_id, &organization_id, body.into())
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn unlink_integration<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    app_ctx: WebRequestContext,
+    Query(query): Query<PageQuery>,
+) -> ApiResult<Json<IntegrationStatusResponse>> {
+    let (tenant_id, organization_id) = resolve_scope(&app_ctx, &query)?;
+    let result = state
+        .service
+        .unlink_integration(&tenant_id, &organization_id)
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn begin_oauth_integration<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    app_ctx: WebRequestContext,
+    Query(query): Query<PageQuery>,
+) -> ApiResult<Json<OAuthBeginResponse>> {
+    let (tenant_id, organization_id) = resolve_scope(&app_ctx, &query)?;
+    let result = state
+        .service
+        .begin_oauth_integration(&tenant_id, &organization_id)
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn oauth_callback<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    Query(query): Query<OAuthCallbackQuery>,
+) -> Result<Redirect, (StatusCode, String)> {
+    let success_redirect = std::env::var("SDKWORK_GITHUB_OAUTH_SUCCESS_REDIRECT_URL")
+        .unwrap_or_else(|_| "http://127.0.0.1:5175/integration".to_string());
+    match state
+        .service
+        .complete_oauth_integration(&query.state, &query.code)
+        .await
+    {
+        Ok(_) => Ok(Redirect::temporary(&format!("{success_redirect}?linked=1"))),
+        Err(error) => {
+            let message = urlencoding::encode(&error.to_string());
+            Ok(Redirect::temporary(&format!(
+                "{success_redirect}?linked=0&error={message}"
+            )))
+        }
+    }
 }

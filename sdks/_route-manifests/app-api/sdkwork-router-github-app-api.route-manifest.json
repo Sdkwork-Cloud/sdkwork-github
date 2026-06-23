@@ -15,6 +15,15 @@
       "apiSurface": "app-api"
     },
     {
+      "method": "POST",
+      "path": "/app/v3/api/github/repositories/sync",
+      "operationId": "repositories.sync",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
       "method": "GET",
       "path": "/app/v3/api/github/issues",
       "operationId": "issues.list",
@@ -24,9 +33,45 @@
       "apiSurface": "app-api"
     },
     {
+      "method": "POST",
+      "path": "/app/v3/api/github/issues/sync",
+      "operationId": "issues.sync",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
       "method": "GET",
       "path": "/app/v3/api/github/plans",
       "operationId": "plans.list",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/github/integration",
+      "operationId": "integration.status",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
+      "method": "POST",
+      "path": "/app/v3/api/github/integration",
+      "operationId": "integration.link",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
+      "method": "DELETE",
+      "path": "/app/v3/api/github/integration",
+      "operationId": "integration.unlink",
       "domain": "github",
       "authMode": "dual-token",
       "requestContext": "WebRequestContext",

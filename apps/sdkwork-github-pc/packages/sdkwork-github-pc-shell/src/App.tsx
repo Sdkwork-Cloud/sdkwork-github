@@ -1,10 +1,20 @@
-import { APP_TITLE } from '@sdkwork/github-pc-core';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import {
+  IssuesPage,
+  PlansPage,
+  RepositoriesPage,
+  WorkspaceShell,
+} from '@sdkwork/github-pc-workspace';
 
-export function App() {
+export function AppShell() {
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem' }}>
-      <h1>{APP_TITLE}</h1>
-      <p>Repositories, issues, and planning workspace.</p>
-    </main>
+    <Routes>
+      <Route element={<WorkspaceShell />}>
+        <Route index element={<Navigate replace to="/repositories" />} />
+        <Route path="repositories" element={<RepositoriesPage />} />
+        <Route path="issues" element={<IssuesPage />} />
+        <Route path="plans" element={<PlansPage />} />
+      </Route>
+    </Routes>
   );
 }

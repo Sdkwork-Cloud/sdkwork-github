@@ -8,6 +8,12 @@
   },
   "dependencies": {
     "@sdkwork/github-pc-core": "workspace:*",
-    "react": "^19.1.0"
+    "@sdkwork/github-pc-workspace": "workspace:*",
+    "react": "catalog:",
+    "react-router-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
   }
 }

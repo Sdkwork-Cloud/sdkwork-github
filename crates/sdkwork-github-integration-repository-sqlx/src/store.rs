@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::AnyPool;
+use sdkwork_database_config::DatabaseEngine;
+use sdkwork_database_sqlx::DatabasePool;
 
 use sdkwork_github_integration_service::domain::{Issue, Page, Plan, Repository};
 use sdkwork_github_integration_service::error::ServiceError;
@@ -8,12 +9,16 @@ use sdkwork_github_integration_service::ports::GitHubStore;
 
 #[derive(Clone)]
 pub struct SqlGitHubStore {
-    pool: AnyPool,
+    pool: DatabasePool,
 }
 
 impl SqlGitHubStore {
-    pub fn new(pool: AnyPool) -> Self {
+    pub fn new(pool: DatabasePool) -> Self {
         Self { pool }
+    }
+
+    pub(crate) fn pool(&self) -> &DatabasePool {
+        &self.pool
     }
 }
 
@@ -28,34 +33,70 @@ impl GitHubStore for SqlGitHubStore {
     ) -> Result<Page<Repository>, ServiceError> {
         let offset = ((page.saturating_sub(1)) * page_size) as i64;
         let limit = page_size as i64;
-        let total: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM github_repository WHERE tenant_id = ? AND organization_id = ?",
-        )
-        .bind(tenant_id)
-        .bind(organization_id)
-        .fetch_one(&self.pool)
-        .await
-        .map_err(|error| ServiceError::Repository(error.to_string()))?;
+        match self.pool.engine() {
+            DatabaseEngine::Sqlite => {
+                let pool = self.pool.as_sqlite().expect("sqlite pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_repository WHERE tenant_id = ? AND organization_id = ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
 
-        let rows = sqlx::query_as::<_, RepositoryRow>(
-            "SELECT id, tenant_id, organization_id, full_name, owner, description, default_branch, html_url, is_private, created_at, updated_at
-             FROM github_repository WHERE tenant_id = ? AND organization_id = ?
-             ORDER BY updated_at DESC LIMIT ? OFFSET ?",
-        )
-        .bind(tenant_id)
-        .bind(organization_id)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                let rows = sqlx::query_as::<_, RepositoryRow>(
+                    "SELECT id, tenant_id, organization_id, full_name, owner, description, default_branch, html_url, is_private, created_at, updated_at
+                     FROM github_repository WHERE tenant_id = ? AND organization_id = ?
+                     ORDER BY updated_at DESC LIMIT ? OFFSET ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
 
-        Ok(Page {
-            items: rows.into_iter().map(Into::into).collect(),
-            page,
-            page_size,
-            total: total.0 as u64,
-        })
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+            DatabaseEngine::Postgres => {
+                let pool = self.pool.as_postgres().expect("postgres pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_repository WHERE tenant_id = $1 AND organization_id = $2",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+
+                let rows = sqlx::query_as::<_, RepositoryRow>(
+                    "SELECT id, tenant_id, organization_id, full_name, owner, description, default_branch, html_url, is_private, created_at, updated_at
+                     FROM github_repository WHERE tenant_id = $1 AND organization_id = $2
+                     ORDER BY updated_at DESC LIMIT $3 OFFSET $4",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+        }
     }
 
     async fn list_issues(
@@ -68,60 +109,128 @@ impl GitHubStore for SqlGitHubStore {
     ) -> Result<Page<Issue>, ServiceError> {
         let offset = ((page.saturating_sub(1)) * page_size) as i64;
         let limit = page_size as i64;
-        let (total, rows) = if let Some(repository_id) = repository_id {
-            let total: (i64,) = sqlx::query_as(
-                "SELECT COUNT(*) FROM github_issue WHERE tenant_id = ? AND organization_id = ? AND repository_id = ?",
-            )
-            .bind(tenant_id)
-            .bind(organization_id)
-            .bind(repository_id)
-            .fetch_one(&self.pool)
-            .await
-            .map_err(|error| ServiceError::Repository(error.to_string()))?;
-            let rows = sqlx::query_as::<_, IssueRow>(
-                "SELECT id, tenant_id, organization_id, repository_id, number, title, state, html_url, created_at, updated_at
-                 FROM github_issue WHERE tenant_id = ? AND organization_id = ? AND repository_id = ?
-                 ORDER BY number DESC LIMIT ? OFFSET ?",
-            )
-            .bind(tenant_id)
-            .bind(organization_id)
-            .bind(repository_id)
-            .bind(limit)
-            .bind(offset)
-            .fetch_all(&self.pool)
-            .await
-            .map_err(|error| ServiceError::Repository(error.to_string()))?;
-            (total, rows)
-        } else {
-            let total: (i64,) = sqlx::query_as(
-                "SELECT COUNT(*) FROM github_issue WHERE tenant_id = ? AND organization_id = ?",
-            )
-            .bind(tenant_id)
-            .bind(organization_id)
-            .fetch_one(&self.pool)
-            .await
-            .map_err(|error| ServiceError::Repository(error.to_string()))?;
-            let rows = sqlx::query_as::<_, IssueRow>(
-                "SELECT id, tenant_id, organization_id, repository_id, number, title, state, html_url, created_at, updated_at
-                 FROM github_issue WHERE tenant_id = ? AND organization_id = ?
-                 ORDER BY updated_at DESC LIMIT ? OFFSET ?",
-            )
-            .bind(tenant_id)
-            .bind(organization_id)
-            .bind(limit)
-            .bind(offset)
-            .fetch_all(&self.pool)
-            .await
-            .map_err(|error| ServiceError::Repository(error.to_string()))?;
-            (total, rows)
-        };
-
-        Ok(Page {
-            items: rows.into_iter().map(Into::into).collect(),
-            page,
-            page_size,
-            total: total.0 as u64,
-        })
+        match (self.pool.engine(), repository_id) {
+            (DatabaseEngine::Sqlite, Some(repository_id)) => {
+                let pool = self.pool.as_sqlite().expect("sqlite pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_issue WHERE tenant_id = ? AND organization_id = ? AND repository_id = ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(repository_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                let rows = sqlx::query_as::<_, IssueRow>(
+                    "SELECT id, tenant_id, organization_id, repository_id, number, title, state, html_url, created_at, updated_at
+                     FROM github_issue WHERE tenant_id = ? AND organization_id = ? AND repository_id = ?
+                     ORDER BY number DESC LIMIT ? OFFSET ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(repository_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+            (DatabaseEngine::Sqlite, None) => {
+                let pool = self.pool.as_sqlite().expect("sqlite pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_issue WHERE tenant_id = ? AND organization_id = ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                let rows = sqlx::query_as::<_, IssueRow>(
+                    "SELECT id, tenant_id, organization_id, repository_id, number, title, state, html_url, created_at, updated_at
+                     FROM github_issue WHERE tenant_id = ? AND organization_id = ?
+                     ORDER BY updated_at DESC LIMIT ? OFFSET ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+            (DatabaseEngine::Postgres, Some(repository_id)) => {
+                let pool = self.pool.as_postgres().expect("postgres pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_issue WHERE tenant_id = $1 AND organization_id = $2 AND repository_id = $3",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(repository_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                let rows = sqlx::query_as::<_, IssueRow>(
+                    "SELECT id, tenant_id, organization_id, repository_id, number, title, state, html_url, created_at, updated_at
+                     FROM github_issue WHERE tenant_id = $1 AND organization_id = $2 AND repository_id = $3
+                     ORDER BY number DESC LIMIT $4 OFFSET $5",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(repository_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+            (DatabaseEngine::Postgres, None) => {
+                let pool = self.pool.as_postgres().expect("postgres pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_issue WHERE tenant_id = $1 AND organization_id = $2",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                let rows = sqlx::query_as::<_, IssueRow>(
+                    "SELECT id, tenant_id, organization_id, repository_id, number, title, state, html_url, created_at, updated_at
+                     FROM github_issue WHERE tenant_id = $1 AND organization_id = $2
+                     ORDER BY updated_at DESC LIMIT $3 OFFSET $4",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+        }
     }
 
     async fn list_plans(
@@ -133,34 +242,70 @@ impl GitHubStore for SqlGitHubStore {
     ) -> Result<Page<Plan>, ServiceError> {
         let offset = ((page.saturating_sub(1)) * page_size) as i64;
         let limit = page_size as i64;
-        let total: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM github_plan WHERE tenant_id = ? AND organization_id = ?",
-        )
-        .bind(tenant_id)
-        .bind(organization_id)
-        .fetch_one(&self.pool)
-        .await
-        .map_err(|error| ServiceError::Repository(error.to_string()))?;
+        match self.pool.engine() {
+            DatabaseEngine::Sqlite => {
+                let pool = self.pool.as_sqlite().expect("sqlite pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_plan WHERE tenant_id = ? AND organization_id = ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
 
-        let rows = sqlx::query_as::<_, PlanRow>(
-            "SELECT id, tenant_id, organization_id, repository_id, title, status, created_at, updated_at
-             FROM github_plan WHERE tenant_id = ? AND organization_id = ?
-             ORDER BY updated_at DESC LIMIT ? OFFSET ?",
-        )
-        .bind(tenant_id)
-        .bind(organization_id)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(|error| ServiceError::Repository(error.to_string()))?;
+                let rows = sqlx::query_as::<_, PlanRow>(
+                    "SELECT id, tenant_id, organization_id, repository_id, title, status, created_at, updated_at
+                     FROM github_plan WHERE tenant_id = ? AND organization_id = ?
+                     ORDER BY updated_at DESC LIMIT ? OFFSET ?",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
 
-        Ok(Page {
-            items: rows.into_iter().map(Into::into).collect(),
-            page,
-            page_size,
-            total: total.0 as u64,
-        })
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+            DatabaseEngine::Postgres => {
+                let pool = self.pool.as_postgres().expect("postgres pool");
+                let total: (i64,) = sqlx::query_as(
+                    "SELECT COUNT(*) FROM github_plan WHERE tenant_id = $1 AND organization_id = $2",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .fetch_one(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+
+                let rows = sqlx::query_as::<_, PlanRow>(
+                    "SELECT id, tenant_id, organization_id, repository_id, title, status, created_at, updated_at
+                     FROM github_plan WHERE tenant_id = $1 AND organization_id = $2
+                     ORDER BY updated_at DESC LIMIT $3 OFFSET $4",
+                )
+                .bind(tenant_id)
+                .bind(organization_id)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+
+                Ok(Page {
+                    items: rows.into_iter().map(Into::into).collect(),
+                    page,
+                    page_size,
+                    total: total.0 as u64,
+                })
+            }
+        }
     }
 }
 
@@ -255,7 +400,11 @@ impl From<PlanRow> for Plan {
     }
 }
 
-fn parse_ts(value: &str) -> DateTime<Utc> {
+pub(crate) fn format_timestamp(value: DateTime<Utc>) -> String {
+    value.to_rfc3339()
+}
+
+pub(crate) fn parse_ts(value: &str) -> DateTime<Utc> {
     DateTime::parse_from_rfc3339(value)
         .map(|value| value.with_timezone(&Utc))
         .unwrap_or_else(|_| Utc::now())

@@ -1,9 +1,20 @@
-import React from 'react';
+import { StrictMode, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from '@sdkwork/github-pc-shell';
+import { GithubRuntimeProvider } from '@sdkwork/github-pc-core';
+import { createGithubPcRuntime } from './bootstrap/createGithubPcRuntime';
+import { GithubAppRoutes } from './bootstrap/routes';
+
+function Root() {
+  const runtime = useMemo(() => createGithubPcRuntime(), []);
+  return (
+    <GithubRuntimeProvider runtime={runtime}>
+      <GithubAppRoutes runtime={runtime} />
+    </GithubRuntimeProvider>
+  );
+}
 
 createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <StrictMode>
+    <Root />
+  </StrictMode>,
 );

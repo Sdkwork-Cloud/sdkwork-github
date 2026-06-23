@@ -17,3 +17,12 @@ sdkwork-web-core.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork-utils-rust.workspace = true
 sdkwork_iam_web_adapter.workspace = true
+urlencoding = "2.1"
+
+[dev-dependencies]
+tokio.workspace = true
+chrono.workspace = true
+sqlx.workspace = true
+sdkwork-database-config.workspace = true
+sdkwork-database-sqlx.workspace = true
+sdkwork-github-integration-repository-sqlx.workspace = true

@@ -13,7 +13,7 @@ const STANDARD_ROOT_DIRECTORIES = [
 const REQUIRED_WORKSPACE_FILES = [
   'AGENTS.md', 'CLAUDE.md', 'CODEX.md', 'GEMINI.md', 'README.md', 'Cargo.toml',
   'sdkwork.workflow.json', '.github/workflows/package.yml',
-  '.sdkwork/README.md', '.sdkwork/skills/README.md', '.sdkwork/plugins/README.md',
+  '.sdkwork/README.md', '.sdkwork/.gitignore', '.sdkwork/skills/README.md', '.sdkwork/plugins/README.md',
   'docs/root-layout.md', 'sdkwork.app.config.json',
 ];
 
@@ -81,10 +81,33 @@ test('integrates sdkwork-utils in Rust crates and PC commons', () => {
   assert.match(read('apps/sdkwork-github-pc/packages/sdkwork-github-pc-commons/src/utils/text.ts'), /@sdkwork\/utils/);
 });
 
-test('integrates sdkwork-database in api-server bootstrap', () => {
-  assert.match(read('crates/sdkwork-github-api-server/Cargo.toml'), /sdkwork-database-config/);
-  assert.match(read('crates/sdkwork-github-api-server/src/bootstrap/database.rs'), /DatabaseConfig::from_env\("github"\)/);
+test('integrates sdkwork-database lifecycle host in api-server bootstrap', () => {
+  assert.match(read('crates/sdkwork-github-api-server/Cargo.toml'), /sdkwork-github-database-host/);
+  assert.match(read('crates/sdkwork-github-api-server/src/bootstrap/database.rs'), /bootstrap_github_database_from_env/);
+  assert.equal(exists('crates/sdkwork-github-database-host/src/lib.rs'), true);
   assert.equal(exists('database/database.manifest.json'), true);
+});
+
+test('integrates GitHub provider adapter for external sync', () => {
+  assert.equal(exists('crates/sdkwork-github-integration-provider-github/src/client.rs'), true);
+  assert.equal(exists('crates/sdkwork-github-integration-provider-github/src/credential.rs'), true);
+  assert.equal(exists('database/migrations/sqlite/0002_github_provider_account.sql'), true);
+  assert.match(read('crates/sdkwork-github-integration-service/src/service.rs'), /link_integration/);
+  assert.match(read('apis/app-api/github/github-app-api.openapi.json'), /integration\.link/);
+});
+
+test('database host supports seed on boot lifecycle option', () => {
+  assert.match(read('crates/sdkwork-github-database-host/src/lib.rs'), /seed_on_boot/);
+  assert.match(read('configs/topology/self-hosted.unified-process.development.env'), /SDKWORK_GITHUB_DATABASE_SEED_ON_BOOT=true/);
+});
+
+test('declares handler integration smoke tests', () => {
+  assert.equal(exists('crates/sdkwork-router-github-app-api/tests/handler_smoke.rs'), true);
+});
+
+test('declares PR verification workflow', () => {
+  assert.equal(exists('.github/workflows/verify.yml'), true);
+  assert.match(read('.github/workflows/verify.yml'), /pnpm verify/);
 });
 
 test('does not declare sdkwork-discovery without RPC services', () => {
@@ -119,4 +142,22 @@ test('PC application root follows apps/sdkwork-github-pc layout', () => {
   assert.equal(exists('apps/sdkwork-github-pc/AGENTS.md'), true);
   const manifest = readJson('apps/sdkwork-github-pc/sdkwork.app.config.json');
   assert.equal(manifest.kind, 'sdkwork.app');
+});
+
+test('declares database framework L2 assets and scripts', () => {
+  const packageJson = readJson('package.json');
+  assert.equal(packageJson.scripts['db:materialize:contract']?.length > 0, true);
+  assert.equal(packageJson.scripts['api:materialize:check']?.length > 0, true);
+  assert.equal(packageJson.scripts['sdk:generate:check']?.length > 0, true);
+  for (const relativePath of [
+    'database/contract/prefix-registry.json',
+    'database/seeds/seed.manifest.json',
+    'database/ddl/baseline/sqlite/0001_github_legacy_baseline.sql',
+    'database/ddl/baseline/postgres/0001_github_legacy_baseline.sql',
+    'sdks/sdkwork-github-app-sdk/sdk-manifest.json',
+    'apps/sdkwork-github-pc/src/bootstrap/createGithubPcRuntime.ts',
+    'apps/sdkwork-github-pc/config/browser/runtime-env.development.example.json',
+  ]) {
+    assert.equal(exists(relativePath), true, `${relativePath} should exist`);
+  }
 });

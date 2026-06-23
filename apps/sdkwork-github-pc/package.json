@@ -10,18 +10,19 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sdkwork/github-pc-commons": "workspace:*",
+    "@sdkwork/auth-pc-react": "workspace:*",
     "@sdkwork/github-pc-core": "workspace:*",
     "@sdkwork/github-pc-shell": "workspace:*",
-    "@sdkwork/utils": "workspace:*",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@sdkwork/github-pc-workspace": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router-dom": "catalog:"
   },
   "devDependencies": {
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
   }
 }

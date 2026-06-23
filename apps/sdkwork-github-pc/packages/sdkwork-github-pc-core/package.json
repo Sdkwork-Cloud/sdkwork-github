@@ -7,6 +7,15 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@sdkwork/github-pc-commons": "workspace:*"
+    "@sdkwork/appbase-app-sdk": "workspace:*",
+    "@sdkwork/auth-runtime-pc-react": "workspace:*",
+    "@sdkwork/github-app-sdk": "workspace:*",
+    "@sdkwork/github-pc-commons": "workspace:*",
+    "@sdkwork/iam-contracts": "workspace:*",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
   }
 }

@@ -8,16 +8,58 @@ const HTTP_ROUTES: &[HttpRoute] = &[
         "repositories.list",
     ),
     HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/github/repositories/sync",
+        "github",
+        "repositories.sync",
+    ),
+    HttpRoute::dual_token(
         HttpMethod::Get,
         "/app/v3/api/github/issues",
         "github",
         "issues.list",
     ),
     HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/github/issues/sync",
+        "github",
+        "issues.sync",
+    ),
+    HttpRoute::dual_token(
         HttpMethod::Get,
         "/app/v3/api/github/plans",
         "github",
         "plans.list",
+    ),
+    HttpRoute::dual_token(
+        HttpMethod::Get,
+        "/app/v3/api/github/integration",
+        "github",
+        "integration.status",
+    ),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/github/integration",
+        "github",
+        "integration.link",
+    ),
+    HttpRoute::dual_token(
+        HttpMethod::Delete,
+        "/app/v3/api/github/integration",
+        "github",
+        "integration.unlink",
+    ),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/github/integration/oauth/begin",
+        "github",
+        "integration.oauth.begin",
+    ),
+    HttpRoute::public(
+        HttpMethod::Get,
+        "/app/v3/api/github/integration/oauth/callback",
+        "github",
+        "integration.oauth.callback",
     ),
 ];
 

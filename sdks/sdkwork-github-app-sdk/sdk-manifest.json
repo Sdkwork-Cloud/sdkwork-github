@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "sdkName": "sdkwork-github-app-sdk",
+  "sdkOwner": "sdkwork-github",
+  "apiAuthority": "sdkwork-github-app-api",
+  "sdkFamily": "sdkwork-github-app-sdk",
+  "sdkType": "app",
+  "apiPrefix": "/app/v3/api",
+  "generationInputSpec": "../../apis/app-api/github/github-app-api.openapi.json",
+  "generatedPackages": {
+    "typescript": {
+      "language": "typescript",
+      "packageName": "sdkwork-github-app-sdk-generated-typescript",
+      "generatedOutput": "sdkwork-github-app-sdk-typescript/generated/server-openapi"
+    }
+  },
+  "generatorName": "@sdkwork/sdk-generator",
+  "generatorPath": "E:\\sdkwork-space\\sdkwork-sdk-generator\\bin\\sdkgen.js",
+  "baseUrl": "http://127.0.0.1:4100",
+  "standardProfile": "sdkwork-v3",
+  "fixedSdkVersion": "0.1.0",
+  "ownerOnlyOperationCount": 8,
+  "operations": [
+    {
+      "method": "POST",
+      "operationId": "integration.link",
+      "path": "/app/v3/api/github/integration"
+    },
+    {
+      "method": "GET",
+      "operationId": "integration.status",
+      "path": "/app/v3/api/github/integration"
+    },
+    {
+      "method": "DELETE",
+      "operationId": "integration.unlink",
+      "path": "/app/v3/api/github/integration"
+    },
+    {
+      "method": "GET",
+      "operationId": "issues.list",
+      "path": "/app/v3/api/github/issues"
+    },
+    {
+      "method": "POST",
+      "operationId": "issues.sync",
+      "path": "/app/v3/api/github/issues/sync"
+    },
+    {
+      "method": "GET",
+      "operationId": "plans.list",
+      "path": "/app/v3/api/github/plans"
+    },
+    {
+      "method": "GET",
+      "operationId": "repositories.list",
+      "path": "/app/v3/api/github/repositories"
+    },
+    {
+      "method": "POST",
+      "operationId": "repositories.sync",
+      "path": "/app/v3/api/github/repositories/sync"
+    }
+  ],
+  "sdkDependencies": [
+    {
+      "workspace": "sdkwork-appbase-app-sdk",
+      "role": "appbase-app-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/app/v3/api",
+      "apiAuthority": "sdkwork-appbase-app-api",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/appbase-app-sdk"
+      }
+    }
+  ],
+  "dependencyApiExports": [],
+  "managedBy": "tools/github_sdk_generator_runner.mjs"
+}

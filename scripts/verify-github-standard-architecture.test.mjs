@@ -144,6 +144,14 @@ test('PC application root follows apps/sdkwork-github-pc layout', () => {
   assert.equal(manifest.kind, 'sdkwork.app');
 });
 
+test('declares production readiness and OAuth alignment surfaces', () => {
+  assert.match(read('crates/sdkwork-github-api-server/src/health.rs'), /ready_check/);
+  assert.match(read('crates/sdkwork-github-api-server/src/health.rs'), /metrics_snapshot/);
+  assert.match(read('apis/app-api/github/github-app-api.openapi.json'), /integration\.oauth\.begin/);
+  assert.equal(exists('database/migrations/sqlite/0003_github_oauth_pending.sql'), true);
+  assert.match(read('apis/backend-api/github/github-backend-api.openapi.json'), /integrations\.list/);
+});
+
 test('declares database framework L2 assets and scripts', () => {
   const packageJson = readJson('package.json');
   assert.equal(packageJson.scripts['db:materialize:contract']?.length > 0, true);

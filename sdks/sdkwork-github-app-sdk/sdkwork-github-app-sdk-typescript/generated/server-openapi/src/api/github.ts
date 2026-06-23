@@ -1,8 +1,45 @@
 import { appApiPath } from './paths';
 import type { HttpClient } from '../http/client';
 
-import type { IntegrationStatus, IssuePage, LinkIntegrationRequest, PlanPage, RepositoryPage, SyncResult } from '../types';
+import type { IntegrationStatus, IssuePage, LinkIntegrationRequest, OAuthBeginResult, PlanPage, RepositoriesListResponsedefault, RepositoryPage, SyncResult } from '../types';
 
+
+export interface GithubIntegrationOauthBeginParams {
+  tenantId?: string;
+  organizationId?: string;
+}
+
+export interface GithubIntegrationOauthCallbackParams {
+  state: string;
+  code: string;
+}
+
+export class GithubIntegrationOauthApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** Begin GitHub OAuth linking for the current tenant scope. */
+  async begin(params?: GithubIntegrationOauthBeginParams): Promise<OAuthBeginResult> {
+    const query = buildQueryString([
+      { name: 'tenant_id', value: params?.tenantId, style: 'form', explode: true, allowReserved: false },
+      { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.post<OAuthBeginResult>(appendQueryString(appApiPath(`/github/integration/oauth/begin`), query));
+  }
+
+/** Complete GitHub OAuth linking callback. */
+  async callback(params: GithubIntegrationOauthCallbackParams): Promise<RepositoriesListResponsedefault> {
+    const query = buildQueryString([
+      { name: 'state', value: params.state, style: 'form', explode: true, allowReserved: false },
+      { name: 'code', value: params.code, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.get<RepositoriesListResponsedefault>(appendQueryString(appApiPath(`/github/integration/oauth/callback`), query));
+  }
+}
 
 export interface GithubIntegrationStatusParams {
   tenantId?: string;
@@ -21,9 +58,11 @@ export interface GithubIntegrationUnlinkParams {
 
 export class GithubIntegrationApi {
   private client: HttpClient;
+  public readonly oauth: GithubIntegrationOauthApi;
 
   constructor(client: HttpClient) {
     this.client = client;
+    this.oauth = new GithubIntegrationOauthApi(client);
   }
 
 

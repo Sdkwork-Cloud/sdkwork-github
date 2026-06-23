@@ -15,6 +15,7 @@ export function WorkspaceShell() {
           <NavLink to="/repositories" style={linkStyle}>Repositories</NavLink>
           <NavLink to="/issues" style={linkStyle}>Issues</NavLink>
           <NavLink to="/plans" style={linkStyle}>Plans</NavLink>
+          <NavLink to="/integration" style={linkStyle}>Integration</NavLink>
         </nav>
       </header>
       <main>

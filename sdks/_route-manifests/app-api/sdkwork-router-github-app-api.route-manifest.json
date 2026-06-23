@@ -76,6 +76,24 @@
       "authMode": "dual-token",
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
+    },
+    {
+      "method": "POST",
+      "path": "/app/v3/api/github/integration/oauth/begin",
+      "operationId": "integration.oauth.begin",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/github/integration/oauth/callback",
+      "operationId": "integration.oauth.callback",
+      "domain": "github",
+      "authMode": "public",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
     }
   ]
 }

@@ -203,7 +203,8 @@ pub async fn oauth_callback<S: GitHubSyncStore>(
     {
         Ok(_) => Ok(Redirect::temporary(&format!("{success_redirect}?linked=1"))),
         Err(error) => {
-            let message = urlencoding::encode(&error.to_string());
+            let error_message = error.to_string();
+            let message = urlencoding::encode(&error_message);
             Ok(Redirect::temporary(&format!(
                 "{success_redirect}?linked=0&error={message}"
             )))

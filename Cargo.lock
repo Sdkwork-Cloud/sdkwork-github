@@ -1842,7 +1842,9 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "sdkwork-database-config",
+ "sdkwork-database-sqlx",
  "sdkwork-github-database-host",
+ "sdkwork-github-integration-provider-github",
  "sdkwork-github-integration-repository-sqlx",
  "sdkwork-github-integration-service",
  "sdkwork-iam-web-adapter",
@@ -1853,6 +1855,7 @@ dependencies = [
  "sdkwork-web-axum",
  "sdkwork-web-core",
  "serde_json",
+ "sqlx",
  "tokio",
  "tower-http",
  "tracing",
@@ -1884,6 +1887,7 @@ dependencies = [
  "sha2",
  "thiserror",
  "tracing",
+ "urlencoding",
  "uuid",
 ]
 
@@ -1981,6 +1985,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tokio",
+ "urlencoding",
 ]
 
 [[package]]
@@ -1988,10 +1993,12 @@ name = "sdkwork-router-github-backend-api"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "http",
  "sdkwork-github-integration-service",
  "sdkwork-iam-web-adapter",
  "sdkwork-web-axum",
  "sdkwork-web-core",
+ "serde",
 ]
 
 [[package]]

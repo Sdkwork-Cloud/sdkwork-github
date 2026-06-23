@@ -56,7 +56,7 @@
     },
     {
       "path": "src/api/github.ts",
-      "sha256": "3c1b926cdf7029608ac753e63cc25eb8516b8926992b6f1736303c6997ff36d6"
+      "sha256": "f405968771068fa1f6132182a3fdb853065c8792f61e042118f11c5ffeadabe8"
     },
     {
       "path": "src/api/index.ts",
@@ -92,7 +92,7 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "3fb630be413e3fdcfa3a91b1d574eef587b00bab2831fc279c80dc47bf3a73cc"
+      "sha256": "b0b4b793d8242eb51a0b76e961e1bb8d34b4e22b5140d9b089a5143bad079e2f"
     },
     {
       "path": "src/types/integration-status.ts",
@@ -109,6 +109,10 @@
     {
       "path": "src/types/link-integration-request.ts",
       "sha256": "92eabc6f60a42858d97fbfe3139ab2bc47bbde404d0650debd8700e79f83f2e2"
+    },
+    {
+      "path": "src/types/oauth-begin-result.ts",
+      "sha256": "b99bc6cfbb43209b894e5d6ebd8eecfaae8fe8b036c579fc0bf5a8156e75d9c5"
     },
     {
       "path": "src/types/plan-page.ts",

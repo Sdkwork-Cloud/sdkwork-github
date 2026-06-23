@@ -9,14 +9,12 @@
     "protocol": "http",
     "packageName": "sdkwork-github-app-sdk-generated-typescript"
   },
-  "changeFingerprint": "ad8d49997715e14673c2ce36317b076d5929b78329719fd24464eaea917c87cd",
+  "changeFingerprint": "ea372a1f4ed6e04a470c8dd222d3da6bf1372997e29c2f7b0b2661fe2a4f352d",
   "changes": {
     "createdGeneratedFiles": [
-      "src/types/integration-status.ts",
-      "src/types/link-integration-request.ts"
+      "src/types/oauth-begin-result.ts"
     ],
     "updatedGeneratedFiles": [
-      "README.md",
       "src/api/github.ts",
       "src/types/index.ts"
     ],
@@ -29,6 +27,7 @@
       "CHANGELOG.md",
       "LICENSE",
       "package.json",
+      "README.md",
       "sdkwork-sdk.json",
       "src/api/base.ts",
       "src/api/index.ts",
@@ -39,8 +38,10 @@
       "src/index.ts",
       "src/sdk.ts",
       "src/types/common.ts",
+      "src/types/integration-status.ts",
       "src/types/issue-page.ts",
       "src/types/issue.ts",
+      "src/types/link-integration-request.ts",
       "src/types/plan-page.ts",
       "src/types/plan.ts",
       "src/types/repositories-list-responsedefault.ts",
@@ -61,8 +62,7 @@
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models",
-      "documentation"
+      "models"
     ],
     "details": [
       {
@@ -75,30 +75,23 @@
         "area": "models",
         "paths": [
           "src/types/index.ts",
-          "src/types/integration-status.ts",
-          "src/types/link-integration-request.ts"
-        ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
+          "src/types/oauth-begin-result.ts"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, models. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-github\\sdks\\sdkwork-github-app-sdk\\sdkwork-github-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -116,7 +109,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, documentation.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-github\\sdks\\sdkwork-github-app-sdk\\sdkwork-github-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [

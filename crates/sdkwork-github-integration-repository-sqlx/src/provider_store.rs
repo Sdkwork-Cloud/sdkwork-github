@@ -4,7 +4,8 @@ use sdkwork_database_config::DatabaseEngine;
 use uuid::Uuid;
 
 use sdkwork_github_integration_service::domain::{
-    IntegrationStatus, Issue, LinkIntegrationCommand, Page, ProviderAccount, Repository,
+    AdminIntegrationView, IntegrationStatus, Issue, LinkIntegrationCommand, Page, ProviderAccount,
+    Repository,
 };
 use sdkwork_github_integration_service::error::ServiceError;
 use sdkwork_github_integration_service::ports::GitHubSyncStore;
@@ -490,7 +491,7 @@ impl GitHubSyncStore for SqlGitHubStore {
         &self,
         page: u32,
         page_size: u32,
-    ) -> Result<Page<crate::domain::AdminIntegrationView>, ServiceError> {
+    ) -> Result<Page<AdminIntegrationView>, ServiceError> {
         let offset = ((page.saturating_sub(1)) * page_size) as i64;
         let limit = page_size as i64;
         match self.pool().engine() {
@@ -554,10 +555,13 @@ impl GitHubSyncStore for SqlGitHubStore {
 
 #[derive(sqlx::FromRow)]
 struct OAuthPendingRow {
+    #[allow(dead_code)]
     state: String,
     tenant_id: String,
     organization_id: String,
+    #[allow(dead_code)]
     created_at: String,
+    #[allow(dead_code)]
     expires_at: String,
 }
 
@@ -572,7 +576,7 @@ struct AdminIntegrationRow {
     last_synced_at: Option<String>,
 }
 
-impl From<AdminIntegrationRow> for crate::domain::AdminIntegrationView {
+impl From<AdminIntegrationRow> for AdminIntegrationView {
     fn from(row: AdminIntegrationRow) -> Self {
         Self {
             tenant_id: row.tenant_id,

@@ -85,6 +85,22 @@ export async function linkIntegration(
   );
 }
 
+export async function unlinkIntegration(
+  client: SdkworkAppClient,
+  context: SessionSnapshot['context'],
+) {
+  const scope = resolveScope(context);
+  return client.github.integration.unlink(scope);
+}
+
+export async function beginOAuthIntegration(
+  client: SdkworkAppClient,
+  context: SessionSnapshot['context'],
+) {
+  const scope = resolveScope(context);
+  return client.github.integration.oauth.begin(scope);
+}
+
 export async function listPlans(
   client: SdkworkAppClient,
   context: SessionSnapshot['context'],

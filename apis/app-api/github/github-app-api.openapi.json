@@ -278,6 +278,71 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "app-api"
       }
+    },
+    "/app/v3/api/github/integration/oauth/begin": {
+      "post": {
+        "summary": "Begin GitHub OAuth linking for the current tenant scope.",
+        "operationId": "integration.oauth.begin",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "OAuth authorization URL.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OAuthBeginResult" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "integration",
+        "x-sdkwork-permission": "github.integration.oauth.begin",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    },
+    "/app/v3/api/github/integration/oauth/callback": {
+      "get": {
+        "summary": "Complete GitHub OAuth linking callback.",
+        "operationId": "integration.oauth.callback",
+        "tags": ["github"],
+        "security": [],
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to application integration page."
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "integration",
+        "x-sdkwork-permission": "github.integration.oauth.callback",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
     }
   },
   "components": {
@@ -396,6 +461,15 @@
           "access_token": { "type": "string" },
           "external_account_id": { "type": "string" },
           "scopes": { "type": "string" }
+        }
+      },
+      "OAuthBeginResult": {
+        "type": "object",
+        "required": ["provider", "authorization_url", "state"],
+        "properties": {
+          "provider": { "type": "string" },
+          "authorization_url": { "type": "string", "format": "uri" },
+          "state": { "type": "string" }
         }
       }
     },

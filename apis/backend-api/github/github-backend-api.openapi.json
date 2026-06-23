@@ -1,8 +1,160 @@
 {
   "openapi": "3.1.2",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "SDKWork GitHub Backend API",
-    "version": "0.1.0"
+    "version": "0.1.0",
+    "description": "GitHub integration backend API for admin operations."
   },
-  "paths": {}
+  "servers": [
+    {
+      "url": "/backend/v3/api",
+      "description": "SDKWork Backend API root"
+    }
+  ],
+  "tags": [
+    {
+      "name": "github",
+      "description": "GitHub integration admin resources."
+    }
+  ],
+  "paths": {
+    "/backend/v3/api/github/integrations": {
+      "get": {
+        "summary": "List active GitHub integrations across tenants.",
+        "operationId": "integrations.list",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PageQuery" },
+          { "$ref": "#/components/parameters/PageSizeQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integration page.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminIntegrationPage" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-backend-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "integrations",
+        "x-sdkwork-permission": "github.integrations.read",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "backend-api"
+      }
+    },
+    "/backend/v3/api/github/integrations/sync": {
+      "post": {
+        "summary": "Trigger repository sync for a tenant integration.",
+        "operationId": "integrations.repositories.sync",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminSyncRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sync result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SyncResult" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-backend-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "integrations",
+        "x-sdkwork-permission": "github.integrations.sync",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "backend-api"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "PageQuery": {
+        "name": "page",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "PageSizeQuery": {
+        "name": "page_size",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+      }
+    },
+    "schemas": {
+      "AdminIntegrationPage": {
+        "type": "object",
+        "required": ["items", "page", "page_size", "total"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AdminIntegrationView" }
+          },
+          "page": { "type": "integer" },
+          "page_size": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      },
+      "AdminIntegrationView": {
+        "type": "object",
+        "required": ["tenant_id", "organization_id", "provider", "linked"],
+        "properties": {
+          "tenant_id": { "type": "string" },
+          "organization_id": { "type": "string" },
+          "provider": { "type": "string" },
+          "linked": { "type": "boolean" },
+          "status": { "type": "string" },
+          "external_account_id": { "type": "string" },
+          "scopes": { "type": "string" },
+          "last_synced_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AdminSyncRequest": {
+        "type": "object",
+        "required": ["tenant_id", "organization_id"],
+        "properties": {
+          "tenant_id": { "type": "string" },
+          "organization_id": { "type": "string" }
+        }
+      },
+      "SyncResult": {
+        "type": "object",
+        "required": ["provider", "synced_count"],
+        "properties": {
+          "provider": { "type": "string" },
+          "synced_count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "responses": {
+      "ProblemDetailResponse": {
+        "description": "Problem Details",
+        "content": {
+          "application/problem+json": {
+            "schema": { "type": "object" }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "AuthToken": { "type": "http", "scheme": "bearer" },
+      "AccessToken": { "type": "apiKey", "in": "header", "name": "Access-Token" }
+    }
+  }
 }

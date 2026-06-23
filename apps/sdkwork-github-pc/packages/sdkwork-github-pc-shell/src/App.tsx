@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import {
+  IntegrationPage,
   IssuesPage,
   PlansPage,
   RepositoriesPage,
@@ -14,6 +15,7 @@ export function AppShell() {
         <Route path="repositories" element={<RepositoriesPage />} />
         <Route path="issues" element={<IssuesPage />} />
         <Route path="plans" element={<PlansPage />} />
+        <Route path="integration" element={<IntegrationPage />} />
       </Route>
     </Routes>
   );

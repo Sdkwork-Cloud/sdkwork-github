@@ -8,4 +8,5 @@ export type { Plan } from './plan';
 export type { SyncResult } from './sync-result';
 export type { IntegrationStatus } from './integration-status';
 export type { LinkIntegrationRequest } from './link-integration-request';
+export type { OAuthBeginResult } from './oauth-begin-result';
 export type { RepositoriesListResponsedefault } from './repositories-list-responsedefault';

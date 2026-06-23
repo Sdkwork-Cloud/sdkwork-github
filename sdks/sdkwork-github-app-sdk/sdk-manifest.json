@@ -19,12 +19,22 @@
   "baseUrl": "http://127.0.0.1:4100",
   "standardProfile": "sdkwork-v3",
   "fixedSdkVersion": "0.1.0",
-  "ownerOnlyOperationCount": 8,
+  "ownerOnlyOperationCount": 10,
   "operations": [
     {
       "method": "POST",
       "operationId": "integration.link",
       "path": "/app/v3/api/github/integration"
+    },
+    {
+      "method": "POST",
+      "operationId": "integration.oauth.begin",
+      "path": "/app/v3/api/github/integration/oauth/begin"
+    },
+    {
+      "method": "GET",
+      "operationId": "integration.oauth.callback",
+      "path": "/app/v3/api/github/integration/oauth/callback"
     },
     {
       "method": "GET",

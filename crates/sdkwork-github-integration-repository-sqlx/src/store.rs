@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use sdkwork_database_config::DatabaseEngine;
 use sdkwork_database_sqlx::DatabasePool;
 
-use sdkwork_github_integration_service::domain::{Issue, Page, Plan, Repository};
+use sdkwork_github_integration_service::domain::{Issue, Page, Plan, PlanItem, Repository};
 use sdkwork_github_integration_service::error::ServiceError;
 use sdkwork_github_integration_service::ports::GitHubStore;
 
@@ -307,6 +307,51 @@ impl GitHubStore for SqlGitHubStore {
             }
         }
     }
+
+    async fn list_plan_items_for_plan_ids(
+        &self,
+        plan_ids: &[String],
+    ) -> Result<Vec<PlanItem>, ServiceError> {
+        if plan_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+        match self.pool.engine() {
+            DatabaseEngine::Sqlite => {
+                let pool = self.pool.as_sqlite().expect("sqlite pool");
+                let mut query = String::from(
+                    "SELECT id, plan_id, title, status, sort_order, issue_id, created_at, updated_at
+                     FROM github_plan_item WHERE plan_id IN (",
+                );
+                query.push_str(&std::iter::repeat("?")
+                    .take(plan_ids.len())
+                    .collect::<Vec<_>>()
+                    .join(", "));
+                query.push_str(") ORDER BY plan_id ASC, sort_order ASC");
+                let mut sql = sqlx::query_as::<_, PlanItemRow>(&query);
+                for plan_id in plan_ids {
+                    sql = sql.bind(plan_id);
+                }
+                sql.fetch_all(pool)
+                    .await
+                    .map_err(|error| ServiceError::Repository(error.to_string()))
+                    .map(|rows| rows.into_iter().map(Into::into).collect())
+            }
+            DatabaseEngine::Postgres => {
+                let pool = self.pool.as_postgres().expect("postgres pool");
+                let mut query = String::from(
+                    "SELECT id, plan_id, title, status, sort_order, issue_id, created_at, updated_at
+                     FROM github_plan_item WHERE plan_id = ANY(",
+                );
+                query.push_str("$1) ORDER BY plan_id ASC, sort_order ASC");
+                sqlx::query_as::<_, PlanItemRow>(&query)
+                    .bind(plan_ids)
+                    .fetch_all(pool)
+                    .await
+                    .map_err(|error| ServiceError::Repository(error.to_string()))
+                    .map(|rows| rows.into_iter().map(Into::into).collect())
+            }
+        }
+    }
 }
 
 #[derive(sqlx::FromRow)]
@@ -394,6 +439,33 @@ impl From<PlanRow> for Plan {
             repository_id: row.repository_id,
             title: row.title,
             status: row.status,
+            created_at: parse_ts(&row.created_at),
+            updated_at: parse_ts(&row.updated_at),
+        }
+    }
+}
+
+#[derive(sqlx::FromRow)]
+struct PlanItemRow {
+    id: String,
+    plan_id: String,
+    title: String,
+    status: String,
+    sort_order: i32,
+    issue_id: Option<String>,
+    created_at: String,
+    updated_at: String,
+}
+
+impl From<PlanItemRow> for PlanItem {
+    fn from(row: PlanItemRow) -> Self {
+        Self {
+            id: row.id,
+            plan_id: row.plan_id,
+            title: row.title,
+            status: row.status,
+            sort_order: row.sort_order,
+            issue_id: row.issue_id,
             created_at: parse_ts(&row.created_at),
             updated_at: parse_ts(&row.updated_at),
         }

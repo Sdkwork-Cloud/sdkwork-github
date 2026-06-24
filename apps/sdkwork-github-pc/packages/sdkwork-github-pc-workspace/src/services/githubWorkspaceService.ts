@@ -114,3 +114,11 @@ export async function listPlans(
     pageSize,
   });
 }
+
+export async function bootstrapNotableCatalog(
+  client: SdkworkAppClient,
+  context: SessionSnapshot['context'],
+) {
+  const scope = resolveScope(context);
+  return client.github.catalog.bootstrap(scope);
+}

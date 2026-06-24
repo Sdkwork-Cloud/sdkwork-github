@@ -82,6 +82,40 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api"
       }
+    },
+    "/backend/v3/api/github/catalog/sync": {
+      "post": {
+        "summary": "Bootstrap notable public GitHub repositories for a tenant scope.",
+        "operationId": "catalog.sync",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminSyncRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Catalog bootstrap result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CatalogBootstrapResult" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-backend-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "catalog",
+        "x-sdkwork-permission": "github.catalog.sync",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "backend-api"
+      }
     }
   },
   "components": {
@@ -139,6 +173,21 @@
         "properties": {
           "provider": { "type": "string" },
           "synced_count": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "CatalogBootstrapResult": {
+        "type": "object",
+        "required": [
+          "repositories_synced",
+          "issues_synced",
+          "plans_created",
+          "plan_items_created"
+        ],
+        "properties": {
+          "repositories_synced": { "type": "integer", "minimum": 0 },
+          "issues_synced": { "type": "integer", "minimum": 0 },
+          "plans_created": { "type": "integer", "minimum": 0 },
+          "plan_items_created": { "type": "integer", "minimum": 0 }
         }
       }
     },

@@ -6,9 +6,22 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '..');
 
-const OPENAPI_PATH = 'apis/app-api/github/github-app-api.openapi.json';
-const MANIFEST_PATH =
-  'sdks/_route-manifests/app-api/sdkwork-router-github-app-api.route-manifest.json';
+const SURFACES = [
+  {
+    label: 'app-api',
+    openapiPath: 'apis/app-api/github/github-app-api.openapi.json',
+    manifestPath:
+      'sdks/_route-manifests/app-api/sdkwork-router-github-app-api.route-manifest.json',
+    expectedApiSurface: 'app-api',
+  },
+  {
+    label: 'backend-api',
+    openapiPath: 'apis/backend-api/github/github-backend-api.openapi.json',
+    manifestPath:
+      'sdks/_route-manifests/backend-api/sdkwork-router-github-backend-api.route-manifest.json',
+    expectedApiSurface: 'backend-api',
+  },
+];
 
 const check = process.argv.includes('--check');
 
@@ -35,30 +48,36 @@ function listOpenApiOperations(openapi) {
   return operations;
 }
 
-function main() {
-  for (const relativePath of [OPENAPI_PATH, MANIFEST_PATH]) {
+function validateSurface({ label, openapiPath, manifestPath, expectedApiSurface }) {
+  const failures = [];
+  for (const relativePath of [openapiPath, manifestPath]) {
     if (!existsSync(resolve(repoRoot, relativePath))) {
-      console.error(`missing required artifact: ${relativePath}`);
-      process.exit(1);
+      failures.push(`${relativePath} should exist`);
     }
   }
+  if (failures.length > 0) {
+    return failures;
+  }
 
-  const openapi = readJson(OPENAPI_PATH);
-  const manifest = readJson(MANIFEST_PATH);
+  const openapi = readJson(openapiPath);
+  const manifest = readJson(manifestPath);
   const openapiOps = listOpenApiOperations(openapi);
   const manifestRoutes = manifest.routes ?? [];
 
-  const failures = [];
   if (openapi.openapi !== '3.1.2') {
-    failures.push(`${OPENAPI_PATH} must declare openapi 3.1.2`);
+    failures.push(`${openapiPath} must declare openapi 3.1.2`);
   }
 
   for (const operation of openapiOps) {
     if (operation.requestContext !== 'WebRequestContext') {
-      failures.push(`${operation.operationId} must declare x-sdkwork-request-context=WebRequestContext`);
+      failures.push(
+        `${label} ${operation.operationId} must declare x-sdkwork-request-context=WebRequestContext`,
+      );
     }
-    if (operation.apiSurface !== 'app-api') {
-      failures.push(`${operation.operationId} must declare x-sdkwork-api-surface=app-api`);
+    if (operation.apiSurface !== expectedApiSurface) {
+      failures.push(
+        `${label} ${operation.operationId} must declare x-sdkwork-api-surface=${expectedApiSurface}`,
+      );
     }
   }
 
@@ -68,7 +87,7 @@ function main() {
   for (const operation of openapiOps) {
     const key = `${operation.method} ${operation.path}#${operation.operationId}`;
     if (!manifestKeys.has(key)) {
-      failures.push(`route manifest missing operation ${key}`);
+      failures.push(`${label} route manifest missing operation ${key}`);
     }
   }
 
@@ -78,10 +97,21 @@ function main() {
   for (const route of manifestRoutes) {
     const key = `${route.method} ${route.path}#${route.operationId}`;
     if (!openapiKeys.has(key)) {
-      failures.push(`OpenAPI missing operation ${key}`);
+      failures.push(`${label} OpenAPI missing operation ${key}`);
+    }
+    if (route.requestContext !== 'WebRequestContext') {
+      failures.push(`${label} manifest route ${key} must declare requestContext=WebRequestContext`);
+    }
+    if (route.apiSurface !== expectedApiSurface) {
+      failures.push(`${label} manifest route ${key} must declare apiSurface=${expectedApiSurface}`);
     }
   }
 
+  return failures;
+}
+
+function main() {
+  const failures = SURFACES.flatMap((surface) => validateSurface(surface));
   if (failures.length > 0) {
     console.error(failures.map((item) => `- ${item}`).join('\n'));
     process.exit(1);

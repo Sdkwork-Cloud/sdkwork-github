@@ -17,5 +17,9 @@ where
             paths::INTEGRATIONS_SYNC,
             post(handlers::sync_integration_repositories::<S>),
         )
+        .route(
+            paths::CATALOG_SYNC,
+            post(handlers::sync_notable_catalog::<S>),
+        )
         .with_state(GitHubBackendState::new(service))
 }

@@ -4,34 +4,66 @@
   "appId": "sdkwork-github",
   "archetype": "application-http-gateway",
   "profileRoot": "configs/topology",
-  "profilePattern": "{hosting}.{serviceLayout}.{environment}.env",
+  "profilePattern": "{deploymentProfile}.{serviceLayout}.{environment}.env",
   "vocabulary": {
-    "hosting": { "allowed": ["self-hosted", "cloud-hosted"] },
-    "serviceLayout": { "allowed": ["unified-process", "split-services"] },
-    "environment": { "allowed": ["development", "production"] }
+    "serviceLayout": {
+      "allowed": [
+        "unified-process",
+        "split-services"
+      ]
+    },
+    "environment": {
+      "allowed": [
+        "development",
+        "production"
+      ]
+    },
+    "deploymentProfile": {
+      "allowed": [
+        "standalone",
+        "cloud"
+      ]
+    }
   },
   "defaults": {
-    "developmentProfileId": "self-hosted.unified-process.development",
-    "productionProfileId": "cloud-hosted.split-services.production",
+    "developmentProfileId": "standalone.unified-process.development",
+    "productionProfileId": "cloud.split-services.production",
     "gatewayBind": "127.0.0.1:4100"
   },
   "profileFiles": {
-    "self-hosted.unified-process.development": "configs/topology/self-hosted.unified-process.development.env"
+    "standalone.unified-process.development": "configs/topology/standalone.unified-process.development.env",
+    "cloud.split-services.production": "configs/topology/cloud.split-services.production.env",
+    "standalone.unified-process.production": "configs/topology/standalone.unified-process.production.env",
+    "standalone.split-services.development": "configs/topology/standalone.split-services.development.env",
+    "cloud.split-services.development": "configs/topology/cloud.split-services.development.env"
   },
   "envKeys": {
-    "hosting": "SDKWORK_GITHUB_HOSTING",
     "serviceLayout": "SDKWORK_GITHUB_SERVICE_LAYOUT",
     "environment": "SDKWORK_GITHUB_ENVIRONMENT",
     "profileId": "SDKWORK_GITHUB_PROFILE_ID",
-    "standaloneGatewayBind": "SDKWORK_GITHUB_APPLICATION_PUBLIC_INGRESS_BIND"
+    "standaloneGatewayBind": "SDKWORK_GITHUB_APPLICATION_PUBLIC_INGRESS_BIND",
+    "deploymentProfile": "SDKWORK_GITHUB_DEPLOYMENT_PROFILE"
   },
   "surfaces": {
     "application.public-ingress": {
       "connectivityPlane": "application",
-      "protocols": ["http"],
+      "protocols": [
+        "http"
+      ],
       "bindEnv": "SDKWORK_GITHUB_APPLICATION_PUBLIC_INGRESS_BIND",
       "httpUrlEnv": "SDKWORK_GITHUB_APPLICATION_PUBLIC_HTTP_URL",
       "clientHttpEnv": "VITE_SDKWORK_GITHUB_APPLICATION_PUBLIC_HTTP_URL"
+    },
+    "platform.api-gateway": {
+      "connectivityPlane": "platform",
+      "protocols": [
+        "http"
+      ],
+      "owner": "sdkwork-api-cloud-gateway",
+      "bindEnv": "SDKWORK_API_CLOUD_GATEWAY_BIND",
+      "httpUrlEnv": "SDKWORK_GITHUB_PLATFORM_API_GATEWAY_HTTP_URL",
+      "clientHttpEnv": "VITE_SDKWORK_GITHUB_PLATFORM_API_GATEWAY_HTTP_URL",
+      "autostartEnv": "SDKWORK_GITHUB_PLATFORM_API_GATEWAY_AUTOSTART"
     }
   },
   "database": {
@@ -41,6 +73,109 @@
     "applicationServer": {
       "crate": "sdkwork-github-api-server",
       "binary": "sdkwork-github-api-server"
+    },
+    "cloudGateway": {
+      "crate": "sdkwork-api-cloud-gateway-api-server",
+      "binary": "sdkwork-api-cloud-gateway",
+      "repository": "sdkwork-api-cloud-gateway",
+      "configGlob": "configs/sdkwork-api-cloud-gateway.github.{profile}.toml"
     }
+  },
+  "retired": {
+    "vocabulary": {
+      "hosting": [
+        "self-hosted",
+        "cloud-hosted"
+      ]
+    },
+    "envKeys": [
+      "SDKWORK_GITHUB_HOSTING"
+    ]
+  },
+  "cloudPublicHosts": {
+    "platform.api-gateway": {
+      "httpHost": "api.sdkwork.com"
+    }
+  },
+  "orchestration": {
+    "profiles": {
+      "standalone.unified-process.development": {
+        "processes": [
+          {
+            "id": "application.public-ingress",
+            "crate": "sdkwork-github-api-server",
+            "binary": "sdkwork-github-api-server",
+            "required": true
+          }
+        ],
+        "healthSurfaces": [
+          "application.public-ingress"
+        ]
+      },
+      "cloud.split-services.development": {
+        "processes": [
+          {
+            "id": "platform.api-gateway",
+            "crate": "sdkwork-api-cloud-gateway-api-server",
+            "binary": "sdkwork-api-cloud-gateway",
+            "repository": "sdkwork-api-cloud-gateway",
+            "required": false
+          },
+          {
+            "id": "application.public-ingress",
+            "crate": "sdkwork-github-api-server",
+            "binary": "sdkwork-github-api-server",
+            "required": true
+          }
+        ],
+        "healthSurfaces": [
+          "application.public-ingress",
+          "platform.api-gateway"
+        ]
+      },
+      "cloud.split-services.production": {
+        "processes": [
+          {
+            "id": "platform.api-gateway",
+            "crate": "sdkwork-api-cloud-gateway-api-server",
+            "binary": "sdkwork-api-cloud-gateway",
+            "repository": "sdkwork-api-cloud-gateway",
+            "required": false
+          },
+          {
+            "id": "application.public-ingress",
+            "crate": "sdkwork-github-api-server",
+            "binary": "sdkwork-github-api-server",
+            "required": true
+          }
+        ],
+        "healthSurfaces": [
+          "application.public-ingress",
+          "platform.api-gateway"
+        ]
+      }
+    }
+  },
+  "packaging": {
+    "cloudConfigFiles": [
+      "sdkwork-api-cloud-gateway.github.development.toml",
+      "sdkwork-api-cloud-gateway.github.production.toml"
+    ],
+    "targets": [
+      {
+        "id": "container-noarch-cloud-container-config-bundle-tar-gz",
+        "profile": "container",
+        "platform": "container",
+        "architecture": "noarch",
+        "formats": [
+          "tar.gz"
+        ],
+        "runner": "ubuntu-24.04",
+        "outputGlob": "dist/cloud-config/sdkwork-github-api-gateway-config-*.tar.gz",
+        "deploymentProfile": "cloud",
+        "runtimeTarget": "container",
+        "variant": "config-bundle"
+      }
+    ]
   }
 }

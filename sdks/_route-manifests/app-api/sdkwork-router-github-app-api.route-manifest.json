@@ -51,6 +51,15 @@
       "apiSurface": "app-api"
     },
     {
+      "method": "POST",
+      "path": "/app/v3/api/github/catalog/bootstrap",
+      "operationId": "catalog.bootstrap",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api"
+    },
+    {
       "method": "GET",
       "path": "/app/v3/api/github/integration",
       "operationId": "integration.status",

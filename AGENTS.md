@@ -35,6 +35,12 @@ Application manifest: `apps/sdkwork-github-pc/sdkwork.app.config.json`. Root man
 - `crates/`: Rust route crates, API server, services, repositories.
 - `apps/sdkwork-github-pc/`: PC React application surface.
 
+## Documentation Canon
+
+- [docs/README.md](docs/README.md)
+- [docs/product/prd/PRD.md](docs/product/prd/PRD.md)
+- [docs/architecture/tech/TECH_ARCHITECTURE.md](docs/architecture/tech/TECH_ARCHITECTURE.md)
+
 ## Spec Resolution Order
 
 1. Read this `AGENTS.md` and any nearer component-level `AGENTS.md`.

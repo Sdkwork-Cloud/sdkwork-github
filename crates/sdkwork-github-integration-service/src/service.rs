@@ -1,7 +1,8 @@
 use sdkwork_utils_rust::string::is_blank;
 
 use crate::domain::{
-    IntegrationStatus, Issue, LinkIntegrationCommand, Page, Plan, Repository, SyncResult,
+    CatalogBootstrapResult, IntegrationStatus, Issue, LinkIntegrationCommand, Page, Plan,
+    PlanItem, PlanView, Repository, SyncResult,
 };
 use crate::error::ServiceError;
 use crate::ports::{GitHubStore, GitHubSyncStore};
@@ -58,11 +59,40 @@ impl<S: GitHubStore> GitHubIntegrationService<S> {
         organization_id: &str,
         page: u32,
         page_size: u32,
-    ) -> Result<Page<Plan>, ServiceError> {
+    ) -> Result<Page<PlanView>, ServiceError> {
         validate_scope(tenant_id, organization_id)?;
-        self.store
+        let page_result = self
+            .store
             .list_plans(tenant_id, organization_id, page, page_size)
-            .await
+            .await?;
+        let plan_ids: Vec<String> = page_result.items.iter().map(|plan| plan.id.clone()).collect();
+        let mut items = self.store.list_plan_items_for_plan_ids(&plan_ids).await?;
+        items.sort_by(|left, right| {
+            left.plan_id
+                .cmp(&right.plan_id)
+                .then(left.sort_order.cmp(&right.sort_order))
+        });
+        let mut items_by_plan: std::collections::HashMap<String, Vec<PlanItem>> =
+            std::collections::HashMap::new();
+        for item in items {
+            items_by_plan
+                .entry(item.plan_id.clone())
+                .or_default()
+                .push(item);
+        }
+        Ok(Page {
+            items: page_result
+                .items
+                .into_iter()
+                .map(|plan| {
+                    let plan_items = items_by_plan.remove(&plan.id).unwrap_or_default();
+                    PlanView::from_plan(plan, plan_items)
+                })
+                .collect(),
+            page: page_result.page,
+            page_size: page_result.page_size,
+            total: page_result.total,
+        })
     }
 }
 
@@ -82,7 +112,7 @@ impl<S: GitHubSyncStore> GitHubIntegrationService<S> {
         &self,
         tenant_id: &str,
         organization_id: &str,
-        command: LinkIntegrationCommand,
+        mut command: LinkIntegrationCommand,
     ) -> Result<IntegrationStatus, ServiceError> {
         validate_scope(tenant_id, organization_id)?;
         if is_blank(Some(command.access_token.as_str())) {
@@ -90,6 +120,8 @@ impl<S: GitHubSyncStore> GitHubIntegrationService<S> {
                 "access_token is required".to_string(),
             ));
         }
+
+        command = enrich_link_command(command).await?;
 
         let cipher = sdkwork_github_integration_provider_github::GitHubCredentialCipher::from_env()
             .map_err(|error| ServiceError::Configuration(error.to_string()))?;
@@ -129,6 +161,7 @@ impl<S: GitHubSyncStore> GitHubIntegrationService<S> {
         validate_scope(tenant_id, organization_id)?;
         let oauth = sdkwork_github_integration_provider_github::GitHubOAuthClient::from_env()
             .map_err(|error| ServiceError::Configuration(error.to_string()))?;
+        self.store.purge_expired_oauth_pending().await?;
         let state = uuid::Uuid::new_v4().to_string();
         let expires_at = chrono::Utc::now() + chrono::Duration::minutes(10);
         self.store
@@ -158,17 +191,21 @@ impl<S: GitHubSyncStore> GitHubIntegrationService<S> {
             .ok_or_else(|| ServiceError::Validation("oauth state is invalid or expired".to_string()))?;
         let oauth = sdkwork_github_integration_provider_github::GitHubOAuthClient::from_env()
             .map_err(|error| ServiceError::Configuration(error.to_string()))?;
-        let access_token = oauth
+        let exchange = oauth
             .exchange_code(code)
             .await
             .map_err(|error| ServiceError::Integration(error.to_string()))?;
+        let scopes = exchange
+            .scope
+            .filter(|value| !value.trim().is_empty())
+            .or_else(|| Some(oauth.configured_scopes().to_string()));
         self.link_integration(
             &tenant_id,
             &organization_id,
-            crate::domain::LinkIntegrationCommand {
-                access_token,
+            LinkIntegrationCommand {
+                access_token: exchange.access_token,
                 external_account_id: None,
-                scopes: Some("read:user,repo".to_string()),
+                scopes,
             },
         )
         .await
@@ -180,6 +217,153 @@ impl<S: GitHubSyncStore> GitHubIntegrationService<S> {
         page_size: u32,
     ) -> Result<Page<crate::domain::AdminIntegrationView>, ServiceError> {
         self.store.list_admin_integrations(page, page_size).await
+    }
+
+    pub async fn bootstrap_notable_catalog(
+        &self,
+        tenant_id: &str,
+        organization_id: &str,
+    ) -> Result<CatalogBootstrapResult, ServiceError> {
+        validate_scope(tenant_id, organization_id)?;
+        let catalog = crate::catalog::load_notable_repository_catalog(
+            &crate::catalog::resolve_catalog_app_root(),
+        )?;
+        let public_api = sdkwork_github_integration_provider_github::GitHubPublicApiClient::new();
+        let provider = self.resolve_provider(tenant_id, organization_id).await.ok();
+        let now = chrono::Utc::now();
+        let mut result = CatalogBootstrapResult {
+            repositories_synced: 0,
+            issues_synced: 0,
+            plans_created: 0,
+            plan_items_created: 0,
+        };
+
+        for (index, entry) in catalog.repositories.into_iter().enumerate() {
+            if index > 0 {
+                tokio::time::sleep(std::time::Duration::from_millis(300)).await;
+            }
+
+            let remote = match public_api
+                .fetch_repository(&entry.owner, &entry.name)
+                .await
+            {
+                Ok(remote) => remote,
+                Err(error) => {
+                    tracing::warn!(
+                        owner = entry.owner.as_str(),
+                        repo = entry.name.as_str(),
+                        error = %error,
+                        "catalog repository fetch skipped"
+                    );
+                    continue;
+                }
+            };
+            let repository = Repository {
+                id: format!("github-repo-{}", remote.id),
+                tenant_id: tenant_id.to_string(),
+                organization_id: organization_id.to_string(),
+                full_name: remote.full_name.clone(),
+                owner: remote.owner.login.clone(),
+                description: remote.description,
+                default_branch: remote.default_branch,
+                html_url: remote.html_url,
+                is_private: remote.private,
+                created_at: now,
+                updated_at: now,
+            };
+            self.store.upsert_repository(&repository).await?;
+            result.repositories_synced += 1;
+
+            let mut linked_issue_id = None;
+            if entry.sync_issues && entry.max_issues > 0 {
+                if let Some(provider) = provider.as_ref() {
+                    match provider
+                        .fetch_issues(&entry.owner, &entry.name)
+                        .await
+                    {
+                        Ok(remote_issues) => {
+                            for (index, remote_issue) in remote_issues
+                                .into_iter()
+                                .take(entry.max_issues as usize)
+                                .enumerate()
+                            {
+                                let issue = Issue {
+                                    id: format!("github-issue-{}", remote_issue.id),
+                                    tenant_id: tenant_id.to_string(),
+                                    organization_id: organization_id.to_string(),
+                                    repository_id: repository.id.clone(),
+                                    number: remote_issue.number,
+                                    title: remote_issue.title,
+                                    state: remote_issue.state,
+                                    html_url: remote_issue.html_url,
+                                    created_at: now,
+                                    updated_at: now,
+                                };
+                                if index == 0 {
+                                    linked_issue_id = Some(issue.id.clone());
+                                }
+                                self.store.upsert_issue(&issue).await?;
+                                result.issues_synced += 1;
+                            }
+                        }
+                        Err(error) => {
+                            tracing::warn!(
+                                owner = entry.owner.as_str(),
+                                repo = entry.name.as_str(),
+                                error = %error,
+                                "catalog issue sync skipped for repository"
+                            );
+                        }
+                    }
+                } else {
+                    tracing::info!(
+                        owner = entry.owner.as_str(),
+                        repo = entry.name.as_str(),
+                        "catalog issue sync skipped because GitHub provider is not configured"
+                    );
+                }
+            }
+
+            let plan_id = format!("github-plan-catalog-{}-{}", entry.owner, entry.name);
+            let plan = Plan {
+                id: plan_id.clone(),
+                tenant_id: tenant_id.to_string(),
+                organization_id: organization_id.to_string(),
+                repository_id: Some(repository.id.clone()),
+                title: entry.plan_title.clone(),
+                status: "active".to_string(),
+                created_at: now,
+                updated_at: now,
+            };
+            self.store.upsert_plan(&plan).await?;
+            result.plans_created += 1;
+
+            let checklist = [
+                "Review README and contribution guide",
+                "Monitor high-priority open issues",
+                "Track release milestones",
+            ];
+            for (sort_order, title) in checklist.iter().enumerate() {
+                let item = PlanItem {
+                    id: format!("{plan_id}-item-{sort_order}"),
+                    plan_id: plan_id.clone(),
+                    title: (*title).to_string(),
+                    status: "pending".to_string(),
+                    sort_order: sort_order as i32,
+                    issue_id: if sort_order == 1 {
+                        linked_issue_id.clone()
+                    } else {
+                        None
+                    },
+                    created_at: now,
+                    updated_at: now,
+                };
+                self.store.upsert_plan_item(&item).await?;
+                result.plan_items_created += 1;
+            }
+        }
+
+        Ok(result)
     }
 
     pub async fn sync_repositories(
@@ -328,10 +512,28 @@ impl<S: GitHubSyncStore> GitHubIntegrationService<S> {
         }
 
         Err(ServiceError::Configuration(
-            "GitHub integration is not linked and SDKWORK_GITHUB_INTEGRATION_PAT is not configured"
+            "GitHub integration is not linked; configure tenant OAuth/PAT linking before sync"
                 .to_string(),
         ))
     }
+}
+
+async fn enrich_link_command(
+    mut command: LinkIntegrationCommand,
+) -> Result<LinkIntegrationCommand, ServiceError> {
+    if command
+        .external_account_id
+        .as_ref()
+        .is_none_or(|value| is_blank(Some(value.as_str())))
+    {
+        let provider = build_provider(command.access_token.clone());
+        let user = provider
+            .fetch_current_user()
+            .await
+            .map_err(|error| ServiceError::Integration(error.to_string()))?;
+        command.external_account_id = Some(user.id.to_string());
+    }
+    Ok(command)
 }
 
 fn build_provider(token: String) -> sdkwork_github_integration_provider_github::GitHubRestProvider {

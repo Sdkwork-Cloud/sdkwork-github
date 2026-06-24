@@ -115,3 +115,52 @@ tables:
       - name: updated_at
         type: timestamp
         nullable: false
+  - name: github_provider_account
+    columns:
+      - name: id
+        type: string
+        primaryKey: true
+      - name: tenant_id
+        type: string
+        nullable: false
+      - name: organization_id
+        type: string
+        nullable: false
+      - name: provider
+        type: string
+        nullable: false
+      - name: external_account_id
+        type: string
+      - name: access_token_cipher
+        type: string
+        nullable: false
+      - name: scopes
+        type: string
+      - name: status
+        type: string
+        nullable: false
+      - name: last_synced_at
+        type: timestamp
+      - name: created_at
+        type: timestamp
+        nullable: false
+      - name: updated_at
+        type: timestamp
+        nullable: false
+  - name: github_oauth_pending
+    columns:
+      - name: state
+        type: string
+        primaryKey: true
+      - name: tenant_id
+        type: string
+        nullable: false
+      - name: organization_id
+        type: string
+        nullable: false
+      - name: created_at
+        type: timestamp
+        nullable: false
+      - name: expires_at
+        type: timestamp
+        nullable: false

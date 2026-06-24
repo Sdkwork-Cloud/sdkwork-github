@@ -12,4 +12,5 @@ uuid.workspace = true
 sdkwork-utils-rust.workspace = true
 sdkwork-github-integration-provider-github.workspace = true
 tracing.workspace = true
+tokio = { workspace = true, features = ["time"] }
 thiserror = "2.0"

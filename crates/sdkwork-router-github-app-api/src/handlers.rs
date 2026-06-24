@@ -8,8 +8,9 @@ use sdkwork_utils_rust::string::is_blank;
 use sdkwork_web_core::WebRequestContext;
 
 use crate::dto::{
-    IntegrationStatusResponse, IssuePageResponse, LinkIntegrationRequest, OAuthBeginResponse,
-    OAuthCallbackQuery, PageQuery, PlanPageResponse, RepositoryPageResponse, SyncResponse,
+    CatalogBootstrapResponse, IntegrationStatusResponse, IssuePageResponse, LinkIntegrationRequest,
+    OAuthBeginResponse, OAuthCallbackQuery, PageQuery, PlanPageResponse, RepositoryPageResponse,
+    SyncResponse,
 };
 use crate::state::GitHubAppState;
 
@@ -171,6 +172,20 @@ pub async fn unlink_integration<S: GitHubSyncStore>(
     let result = state
         .service
         .unlink_integration(&tenant_id, &organization_id)
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn bootstrap_notable_catalog<S: GitHubSyncStore>(
+    State(state): State<GitHubAppState<S>>,
+    app_ctx: WebRequestContext,
+    Query(query): Query<PageQuery>,
+) -> ApiResult<Json<CatalogBootstrapResponse>> {
+    let (tenant_id, organization_id) = resolve_scope(&app_ctx, &query)?;
+    let result = state
+        .service
+        .bootstrap_notable_catalog(&tenant_id, &organization_id)
         .await
         .map_err(map_service_error)?;
     Ok(Json(result.into()))

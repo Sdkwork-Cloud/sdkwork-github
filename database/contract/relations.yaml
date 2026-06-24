@@ -1,0 +1,39 @@
+schemaVersion: 1
+kind: sdkwork.database.relations
+moduleId: github
+tables:
+  github_repository:
+    role: aggregate-root
+    scoped_by: [tenant_id, organization_id]
+  github_issue:
+    belongs_to:
+      - table: github_repository
+        column: repository_id
+        references: id
+        on_delete: cascade
+    scoped_by: [tenant_id, organization_id]
+  github_plan:
+    belongs_to:
+      - table: github_repository
+        column: repository_id
+        references: id
+        on_delete: set_null
+        optional: true
+    scoped_by: [tenant_id, organization_id]
+  github_plan_item:
+    belongs_to:
+      - table: github_plan
+        column: plan_id
+        references: id
+        on_delete: cascade
+      - table: github_issue
+        column: issue_id
+        references: id
+        on_delete: set_null
+        optional: true
+  github_provider_account:
+    scoped_by: [tenant_id, organization_id]
+    unique: [tenant_id, organization_id, provider]
+  github_oauth_pending:
+    ephemeral: true
+    scoped_by: [tenant_id, organization_id]

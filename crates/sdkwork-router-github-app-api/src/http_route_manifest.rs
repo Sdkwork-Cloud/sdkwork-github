@@ -1,6 +1,8 @@
 use sdkwork_web_core::{HttpMethod, HttpRoute, HttpRouteManifest};
 
-const HTTP_ROUTES: &[HttpRoute] = &[
+const HTTP_ROUTES: &[HttpRoute] = &APP_HTTP_ROUTES;
+
+pub const APP_HTTP_ROUTES: [HttpRoute; 11] = [
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/app/v3/api/github/repositories",
@@ -30,6 +32,12 @@ const HTTP_ROUTES: &[HttpRoute] = &[
         "/app/v3/api/github/plans",
         "github",
         "plans.list",
+    ),
+    HttpRoute::dual_token(
+        HttpMethod::Post,
+        "/app/v3/api/github/catalog/bootstrap",
+        "github",
+        "catalog.bootstrap",
     ),
     HttpRoute::dual_token(
         HttpMethod::Get,

@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const profile = resolve(root, 'configs/topology/self-hosted.unified-process.development.env');
+const profile = resolve(root, 'configs/topology/standalone.unified-process.development.env');
 const env = Object.fromEntries(
   readFileSync(profile, 'utf8')
     .split(/\r?\n/u)

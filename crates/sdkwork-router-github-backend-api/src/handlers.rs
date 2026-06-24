@@ -4,7 +4,7 @@ use http::StatusCode;
 use sdkwork_github_integration_service::error::ServiceError;
 use sdkwork_github_integration_service::ports::GitHubSyncStore;
 
-use crate::dto::{AdminIntegrationPageResponse, AdminSyncRequest, PageQuery, SyncResponse};
+use crate::dto::{AdminIntegrationPageResponse, AdminSyncRequest, CatalogBootstrapResponse, PageQuery, SyncResponse};
 use crate::state::GitHubBackendState;
 
 type ApiResult<T> = Result<T, (StatusCode, String)>;
@@ -39,6 +39,18 @@ pub async fn sync_integration_repositories<S: GitHubSyncStore>(
     let result = state
         .service
         .sync_repositories(&body.tenant_id, &body.organization_id)
+        .await
+        .map_err(map_service_error)?;
+    Ok(Json(result.into()))
+}
+
+pub async fn sync_notable_catalog<S: GitHubSyncStore>(
+    State(state): State<GitHubBackendState<S>>,
+    Json(body): Json<AdminSyncRequest>,
+) -> ApiResult<Json<CatalogBootstrapResponse>> {
+    let result = state
+        .service
+        .bootstrap_notable_catalog(&body.tenant_id, &body.organization_id)
         .await
         .map_err(map_service_error)?;
     Ok(Json(result.into()))

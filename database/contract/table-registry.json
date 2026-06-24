@@ -31,6 +31,12 @@
       "owner": "github-platform",
       "compliance_level": "L2",
       "lifecycle_status": "active"
+    },
+    {
+      "table_name": "github_oauth_pending",
+      "owner": "github-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
     }
   ]
 }

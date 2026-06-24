@@ -43,3 +43,16 @@ INSERT OR IGNORE INTO github_plan (
     '2026-01-01T00:00:00Z',
     '2026-01-01T00:00:00Z'
 );
+
+INSERT OR IGNORE INTO github_plan_item (
+    id, plan_id, title, status, sort_order, issue_id, created_at, updated_at
+) VALUES (
+    'github-plan-item-demo-1',
+    'github-plan-demo-1',
+    'Verify bootstrap issue linkage',
+    'pending',
+    1,
+    'github-issue-demo-1',
+    '2026-01-01T00:00:00Z',
+    '2026-01-01T00:00:00Z'
+);

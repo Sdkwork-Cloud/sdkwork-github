@@ -1,7 +1,7 @@
 import { appApiPath } from './paths';
 import type { HttpClient } from '../http/client';
 
-import type { IntegrationStatus, IssuePage, LinkIntegrationRequest, OAuthBeginResult, PlanPage, RepositoriesListResponsedefault, RepositoryPage, SyncResult } from '../types';
+import type { CatalogBootstrapResult, IntegrationStatus, IssuePage, LinkIntegrationRequest, OAuthBeginResult, PlanPage, RepositoriesListResponsedefault, RepositoryPage, SyncResult } from '../types';
 
 
 export interface GithubIntegrationOauthBeginParams {
@@ -91,6 +91,29 @@ export class GithubIntegrationApi {
       { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
     ]);
     return this.client.delete<IntegrationStatus>(appendQueryString(appApiPath(`/github/integration`), query));
+  }
+}
+
+export interface GithubCatalogBootstrapParams {
+  tenantId?: string;
+  organizationId?: string;
+}
+
+export class GithubCatalogApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** Bootstrap notable public GitHub repositories, issues, and plans. */
+  async bootstrap(params?: GithubCatalogBootstrapParams): Promise<CatalogBootstrapResult> {
+    const query = buildQueryString([
+      { name: 'tenant_id', value: params?.tenantId, style: 'form', explode: true, allowReserved: false },
+      { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.post<CatalogBootstrapResult>(appendQueryString(appApiPath(`/github/catalog/bootstrap`), query));
   }
 }
 
@@ -212,6 +235,7 @@ export class GithubApi {
   public readonly repositories: GithubRepositoriesApi;
   public readonly issues: GithubIssuesApi;
   public readonly plans: GithubPlansApi;
+  public readonly catalog: GithubCatalogApi;
   public readonly integration: GithubIntegrationApi;
 
   constructor(client: HttpClient) {
@@ -219,6 +243,7 @@ export class GithubApi {
     this.repositories = new GithubRepositoriesApi(client);
     this.issues = new GithubIssuesApi(client);
     this.plans = new GithubPlansApi(client);
+    this.catalog = new GithubCatalogApi(client);
     this.integration = new GithubIntegrationApi(client);
   }
 

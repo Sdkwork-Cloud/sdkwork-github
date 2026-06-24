@@ -4,8 +4,8 @@ use sdkwork_database_config::DatabaseEngine;
 use uuid::Uuid;
 
 use sdkwork_github_integration_service::domain::{
-    AdminIntegrationView, IntegrationStatus, Issue, LinkIntegrationCommand, Page, ProviderAccount,
-    Repository,
+    AdminIntegrationView, IntegrationStatus, Issue, LinkIntegrationCommand, Page, Plan, PlanItem,
+    ProviderAccount, Repository,
 };
 use sdkwork_github_integration_service::error::ServiceError;
 use sdkwork_github_integration_service::ports::GitHubSyncStore;
@@ -129,6 +129,116 @@ impl GitHubSyncStore for SqlGitHubStore {
                 .bind(&issue.title)
                 .bind(&issue.state)
                 .bind(&issue.html_url)
+                .bind(created_at)
+                .bind(updated_at)
+                .execute(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+            }
+        }
+        Ok(())
+    }
+
+    async fn upsert_plan(&self, plan: &Plan) -> Result<(), ServiceError> {
+        let created_at = format_timestamp(plan.created_at);
+        let updated_at = format_timestamp(plan.updated_at);
+        match self.pool().engine() {
+            DatabaseEngine::Sqlite => {
+                let pool = self.pool().as_sqlite().expect("sqlite pool");
+                sqlx::query(
+                    "INSERT INTO github_plan (id, tenant_id, organization_id, repository_id, title, status, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                     ON CONFLICT(id) DO UPDATE SET
+                       repository_id = excluded.repository_id,
+                       title = excluded.title,
+                       status = excluded.status,
+                       updated_at = excluded.updated_at",
+                )
+                .bind(&plan.id)
+                .bind(&plan.tenant_id)
+                .bind(&plan.organization_id)
+                .bind(&plan.repository_id)
+                .bind(&plan.title)
+                .bind(&plan.status)
+                .bind(created_at)
+                .bind(updated_at)
+                .execute(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+            }
+            DatabaseEngine::Postgres => {
+                let pool = self.pool().as_postgres().expect("postgres pool");
+                sqlx::query(
+                    "INSERT INTO github_plan (id, tenant_id, organization_id, repository_id, title, status, created_at, updated_at)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                     ON CONFLICT(id) DO UPDATE SET
+                       repository_id = EXCLUDED.repository_id,
+                       title = EXCLUDED.title,
+                       status = EXCLUDED.status,
+                       updated_at = EXCLUDED.updated_at",
+                )
+                .bind(&plan.id)
+                .bind(&plan.tenant_id)
+                .bind(&plan.organization_id)
+                .bind(&plan.repository_id)
+                .bind(&plan.title)
+                .bind(&plan.status)
+                .bind(created_at)
+                .bind(updated_at)
+                .execute(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+            }
+        }
+        Ok(())
+    }
+
+    async fn upsert_plan_item(&self, item: &PlanItem) -> Result<(), ServiceError> {
+        let created_at = format_timestamp(item.created_at);
+        let updated_at = format_timestamp(item.updated_at);
+        match self.pool().engine() {
+            DatabaseEngine::Sqlite => {
+                let pool = self.pool().as_sqlite().expect("sqlite pool");
+                sqlx::query(
+                    "INSERT INTO github_plan_item (id, plan_id, title, status, sort_order, issue_id, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                     ON CONFLICT(id) DO UPDATE SET
+                       title = excluded.title,
+                       status = excluded.status,
+                       sort_order = excluded.sort_order,
+                       issue_id = excluded.issue_id,
+                       updated_at = excluded.updated_at",
+                )
+                .bind(&item.id)
+                .bind(&item.plan_id)
+                .bind(&item.title)
+                .bind(&item.status)
+                .bind(item.sort_order)
+                .bind(&item.issue_id)
+                .bind(created_at)
+                .bind(updated_at)
+                .execute(pool)
+                .await
+                .map_err(|error| ServiceError::Repository(error.to_string()))?;
+            }
+            DatabaseEngine::Postgres => {
+                let pool = self.pool().as_postgres().expect("postgres pool");
+                sqlx::query(
+                    "INSERT INTO github_plan_item (id, plan_id, title, status, sort_order, issue_id, created_at, updated_at)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                     ON CONFLICT(id) DO UPDATE SET
+                       title = EXCLUDED.title,
+                       status = EXCLUDED.status,
+                       sort_order = EXCLUDED.sort_order,
+                       issue_id = EXCLUDED.issue_id,
+                       updated_at = EXCLUDED.updated_at",
+                )
+                .bind(&item.id)
+                .bind(&item.plan_id)
+                .bind(&item.title)
+                .bind(&item.status)
+                .bind(item.sort_order)
+                .bind(&item.issue_id)
                 .bind(created_at)
                 .bind(updated_at)
                 .execute(pool)
@@ -485,6 +595,29 @@ impl GitHubSyncStore for SqlGitHubStore {
             }
         };
         Ok(row.map(|value| (value.tenant_id, value.organization_id)))
+    }
+
+    async fn purge_expired_oauth_pending(&self) -> Result<(), ServiceError> {
+        let now = format_timestamp(Utc::now());
+        match self.pool().engine() {
+            DatabaseEngine::Sqlite => {
+                let pool = self.pool().as_sqlite().expect("sqlite pool");
+                sqlx::query("DELETE FROM github_oauth_pending WHERE expires_at < ?")
+                    .bind(&now)
+                    .execute(pool)
+                    .await
+                    .map_err(|error| ServiceError::Repository(error.to_string()))?;
+            }
+            DatabaseEngine::Postgres => {
+                let pool = self.pool().as_postgres().expect("postgres pool");
+                sqlx::query("DELETE FROM github_oauth_pending WHERE expires_at < $1")
+                    .bind(now)
+                    .execute(pool)
+                    .await
+                    .map_err(|error| ServiceError::Repository(error.to_string()))?;
+            }
+        }
+        Ok(())
     }
 
     async fn list_admin_integrations(

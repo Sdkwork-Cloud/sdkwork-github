@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useGithubPcRuntime } from '@sdkwork/github-pc-core';
-import { listRepositories, syncRepositories, getIntegrationStatus } from '../services/githubWorkspaceService';
+import { listRepositories, syncRepositories, bootstrapNotableCatalog, getIntegrationStatus } from '../services/githubWorkspaceService';
 
 export function RepositoriesPage() {
   const { githubSdk, session } = useGithubPcRuntime();
@@ -8,6 +8,7 @@ export function RepositoriesPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [bootstrapping, setBootstrapping] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [integrationLinked, setIntegrationLinked] = useState<boolean | null>(null);
 
@@ -52,6 +53,23 @@ export function RepositoriesPage() {
     }
   };
 
+  const handleBootstrapCatalog = async () => {
+    setBootstrapping(true);
+    setSyncMessage(null);
+    setError(null);
+    try {
+      const result = await bootstrapNotableCatalog(githubSdk.client, session.getSnapshot().context);
+      setSyncMessage(
+        `Initialized ${result.repositories_synced ?? 0} notable repositories, ${result.issues_synced ?? 0} issues, ${result.plans_created ?? 0} plans.`,
+      );
+      await loadRepositories();
+    } catch (reason: unknown) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBootstrapping(false);
+    }
+  };
+
   if (loading) return <p>Loading repositories…</p>;
 
   return (
@@ -61,8 +79,11 @@ export function RepositoriesPage() {
         {integrationLinked === false ? (
           <span>GitHub not linked for this organization.</span>
         ) : null}
-        <button type="button" onClick={() => void handleSync()} disabled={syncing}>
+        <button type="button" onClick={() => void handleSync()} disabled={syncing || bootstrapping}>
           {syncing ? 'Syncing…' : 'Sync from GitHub'}
+        </button>
+        <button type="button" onClick={() => void handleBootstrapCatalog()} disabled={syncing || bootstrapping}>
+          {bootstrapping ? 'Initializing…' : 'Initialize notable repositories'}
         </button>
       </header>
       {syncMessage ? <p>{syncMessage}</p> : null}

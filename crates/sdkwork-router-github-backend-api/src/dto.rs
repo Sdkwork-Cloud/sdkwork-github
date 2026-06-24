@@ -39,6 +39,27 @@ pub struct SyncResponse {
     pub synced_count: u64,
 }
 
+#[derive(Debug, Serialize)]
+pub struct CatalogBootstrapResponse {
+    pub repositories_synced: u64,
+    pub issues_synced: u64,
+    pub plans_created: u64,
+    pub plan_items_created: u64,
+}
+
+impl From<sdkwork_github_integration_service::domain::CatalogBootstrapResult>
+    for CatalogBootstrapResponse
+{
+    fn from(value: sdkwork_github_integration_service::domain::CatalogBootstrapResult) -> Self {
+        Self {
+            repositories_synced: value.repositories_synced,
+            issues_synced: value.issues_synced,
+            plans_created: value.plans_created,
+            plan_items_created: value.plan_items_created,
+        }
+    }
+}
+
 impl From<SyncResult> for SyncResponse {
     fn from(value: SyncResult) -> Self {
         Self {

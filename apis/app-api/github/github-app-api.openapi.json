@@ -185,6 +185,36 @@
         "x-sdkwork-api-surface": "app-api"
       }
     },
+    "/app/v3/api/github/catalog/bootstrap": {
+      "post": {
+        "summary": "Bootstrap notable public GitHub repositories, issues, and plans.",
+        "operationId": "catalog.bootstrap",
+        "tags": ["github"],
+        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantIdQuery" },
+          { "$ref": "#/components/parameters/OrganizationIdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog bootstrap result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CatalogBootstrapResult" }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+        },
+        "x-sdkwork-owner": "sdkwork-github",
+        "x-sdkwork-api-authority": "sdkwork-github-app-api",
+        "x-sdkwork-domain": "github",
+        "x-sdkwork-resource": "catalog",
+        "x-sdkwork-permission": "github.catalog.bootstrap",
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api"
+      }
+    },
     "/app/v3/api/github/integration": {
       "get": {
         "summary": "Get GitHub integration link status.",
@@ -426,12 +456,27 @@
       },
       "Plan": {
         "type": "object",
-        "required": ["id", "title", "status"],
+        "required": ["id", "title", "status", "items"],
         "properties": {
           "id": { "type": "string" },
           "title": { "type": "string" },
           "status": { "type": "string" },
-          "repository_id": { "type": "string" }
+          "repository_id": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PlanItem" }
+          }
+        }
+      },
+      "PlanItem": {
+        "type": "object",
+        "required": ["id", "title", "status", "sort_order"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string" },
+          "sort_order": { "type": "integer" },
+          "issue_id": { "type": "string" }
         }
       },
       "SyncResult": {
@@ -470,6 +515,21 @@
           "provider": { "type": "string" },
           "authorization_url": { "type": "string", "format": "uri" },
           "state": { "type": "string" }
+        }
+      },
+      "CatalogBootstrapResult": {
+        "type": "object",
+        "required": [
+          "repositories_synced",
+          "issues_synced",
+          "plans_created",
+          "plan_items_created"
+        ],
+        "properties": {
+          "repositories_synced": { "type": "integer", "minimum": 0 },
+          "issues_synced": { "type": "integer", "minimum": 0 },
+          "plans_created": { "type": "integer", "minimum": 0 },
+          "plan_items_created": { "type": "integer", "minimum": 0 }
         }
       }
     },

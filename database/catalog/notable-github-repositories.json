@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.github.notable-repository-catalog",
+  "description": "Curated public GitHub repositories bootstrapped for demos and onboarding.",
+  "repositories": [
+    {
+      "owner": "microsoft",
+      "name": "vscode",
+      "plan_title": "VS Code ecosystem onboarding",
+      "sync_issues": true,
+      "max_issues": 15
+    },
+    {
+      "owner": "facebook",
+      "name": "react",
+      "plan_title": "React adoption checklist",
+      "sync_issues": true,
+      "max_issues": 15
+    },
+    {
+      "owner": "golang",
+      "name": "go",
+      "plan_title": "Go language watchlist",
+      "sync_issues": true,
+      "max_issues": 10
+    },
+    {
+      "owner": "kubernetes",
+      "name": "kubernetes",
+      "plan_title": "Kubernetes operations plan",
+      "sync_issues": true,
+      "max_issues": 10
+    },
+    {
+      "owner": "rust-lang",
+      "name": "rust",
+      "plan_title": "Rust platform tracking",
+      "sync_issues": true,
+      "max_issues": 10
+    },
+    {
+      "owner": "vercel",
+      "name": "next.js",
+      "plan_title": "Next.js release watch",
+      "sync_issues": true,
+      "max_issues": 10
+    },
+    {
+      "owner": "nodejs",
+      "name": "node",
+      "plan_title": "Node.js runtime watch",
+      "sync_issues": true,
+      "max_issues": 10
+    },
+    {
+      "owner": "torvalds",
+      "name": "linux",
+      "plan_title": "Linux kernel watch",
+      "sync_issues": false,
+      "max_issues": 0
+    }
+  ]
+}

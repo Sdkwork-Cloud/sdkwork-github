@@ -43,6 +43,68 @@ pub struct Plan {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlanItem {
+    pub id: String,
+    pub plan_id: String,
+    pub title: String,
+    pub status: String,
+    pub sort_order: i32,
+    pub issue_id: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlanView {
+    pub id: String,
+    pub title: String,
+    pub status: String,
+    pub repository_id: Option<String>,
+    pub items: Vec<PlanItemView>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlanItemView {
+    pub id: String,
+    pub title: String,
+    pub status: String,
+    pub sort_order: i32,
+    pub issue_id: Option<String>,
+}
+
+impl PlanView {
+    pub fn from_plan(plan: Plan, items: Vec<PlanItem>) -> Self {
+        Self {
+            id: plan.id,
+            title: plan.title,
+            status: plan.status,
+            repository_id: plan.repository_id,
+            items: items.into_iter().map(PlanItemView::from).collect(),
+        }
+    }
+}
+
+impl From<PlanItem> for PlanItemView {
+    fn from(item: PlanItem) -> Self {
+        Self {
+            id: item.id,
+            title: item.title,
+            status: item.status,
+            sort_order: item.sort_order,
+            issue_id: item.issue_id,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CatalogBootstrapResult {
+    pub repositories_synced: u64,
+    pub issues_synced: u64,
+    pub plans_created: u64,
+    pub plan_items_created: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Page<T> {
     pub items: Vec<T>,
     pub page: u32,

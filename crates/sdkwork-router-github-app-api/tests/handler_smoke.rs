@@ -31,7 +31,10 @@ async fn install_schema(pool: DatabasePool) {
     let sqlite = pool.as_sqlite().expect("sqlite pool");
     let baseline = include_str!("../../../database/ddl/baseline/sqlite/0001_github_legacy_baseline.sql");
     let migration = include_str!("../../../database/migrations/sqlite/0002_github_provider_account.sql");
-    for script in [baseline, migration] {
+    let oauth_migration = include_str!("../../../database/migrations/sqlite/0003_github_oauth_pending.sql");
+    let integrity_migration =
+        include_str!("../../../database/migrations/sqlite/0004_github_referential_integrity.sql");
+    for script in [baseline, migration, oauth_migration, integrity_migration] {
         for statement in script.split(';').map(str::trim).filter(|value| !value.is_empty()) {
             sqlx::query(statement)
                 .execute(sqlite)
@@ -136,4 +139,88 @@ async fn integration_status_is_unlinked_by_default() {
 
     assert_eq!(response.0.provider, "github");
     assert!(!response.0.linked);
+}
+
+#[tokio::test]
+async fn oauth_begin_requires_oauth_configuration() {
+    std::env::remove_var("SDKWORK_GITHUB_OAUTH_CLIENT_ID");
+    std::env::remove_var("SDKWORK_GITHUB_OAUTH_CLIENT_SECRET");
+    std::env::remove_var("SDKWORK_GITHUB_OAUTH_REDIRECT_URI");
+
+    let store = migrated_store().await;
+    let service = GitHubIntegrationService::new(store);
+    let state = GitHubAppState::new(service);
+    let error = handlers::begin_oauth_integration(
+        State(state),
+        test_context("tenant-a", "org-a"),
+        Query(PageQuery {
+            tenant_id: None,
+            organization_id: None,
+            operator_id: None,
+            page: None,
+            page_size: None,
+            repository_id: None,
+        }),
+    )
+    .await
+    .expect_err("oauth begin should fail without configuration");
+
+    assert_eq!(error.0, http::StatusCode::SERVICE_UNAVAILABLE);
+}
+
+#[tokio::test]
+async fn list_plans_returns_nested_checklist_items() {
+    let store = migrated_store().await;
+    let now = chrono::Utc::now();
+    store
+        .upsert_plan(&sdkwork_github_integration_service::domain::Plan {
+            id: "github-plan-test-1".to_owned(),
+            tenant_id: "tenant-a".to_owned(),
+            organization_id: "org-a".to_owned(),
+            repository_id: Some("github-repo-test-1".to_owned()),
+            title: "Launch checklist".to_owned(),
+            status: "active".to_owned(),
+            created_at: now,
+            updated_at: now,
+        })
+        .await
+        .expect("seed plan");
+    store
+        .upsert_plan_item(&sdkwork_github_integration_service::domain::PlanItem {
+            id: "github-plan-item-test-1".to_owned(),
+            plan_id: "github-plan-test-1".to_owned(),
+            title: "Verify issue linkage".to_owned(),
+            status: "pending".to_owned(),
+            sort_order: 1,
+            issue_id: Some("github-issue-test-1".to_owned()),
+            created_at: now,
+            updated_at: now,
+        })
+        .await
+        .expect("seed plan item");
+
+    let service = GitHubIntegrationService::new(store);
+    let state = GitHubAppState::new(service);
+    let response = handlers::list_plans(
+        State(state),
+        test_context("tenant-a", "org-a"),
+        Query(PageQuery {
+            tenant_id: None,
+            organization_id: None,
+            operator_id: None,
+            page: Some(1),
+            page_size: Some(20),
+            repository_id: None,
+        }),
+    )
+    .await
+    .expect("list plans");
+
+    assert_eq!(response.0.items.len(), 1);
+    assert_eq!(response.0.items[0].title, "Launch checklist");
+    assert_eq!(response.0.items[0].items.len(), 1);
+    assert_eq!(
+        response.0.items[0].items[0].issue_id.as_deref(),
+        Some("github-issue-test-1")
+    );
 }

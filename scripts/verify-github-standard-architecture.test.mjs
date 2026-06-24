@@ -98,7 +98,7 @@ test('integrates GitHub provider adapter for external sync', () => {
 
 test('database host supports seed on boot lifecycle option', () => {
   assert.match(read('crates/sdkwork-github-database-host/src/lib.rs'), /seed_on_boot/);
-  assert.match(read('configs/topology/self-hosted.unified-process.development.env'), /SDKWORK_GITHUB_DATABASE_SEED_ON_BOOT=true/);
+  assert.match(read('configs/topology/standalone.unified-process.development.env'), /SDKWORK_GITHUB_DATABASE_SEED_ON_BOOT=true/);
 });
 
 test('declares handler integration smoke tests', () => {
@@ -148,8 +148,24 @@ test('declares production readiness and OAuth alignment surfaces', () => {
   assert.match(read('crates/sdkwork-github-api-server/src/health.rs'), /ready_check/);
   assert.match(read('crates/sdkwork-github-api-server/src/health.rs'), /metrics_snapshot/);
   assert.match(read('apis/app-api/github/github-app-api.openapi.json'), /integration\.oauth\.begin/);
+  assert.match(read('apis/app-api/github/github-app-api.openapi.json'), /catalog\.bootstrap/);
   assert.equal(exists('database/migrations/sqlite/0003_github_oauth_pending.sql'), true);
+  assert.equal(exists('database/migrations/sqlite/0004_github_referential_integrity.sql'), true);
+  assert.equal(exists('database/catalog/notable-github-repositories.json'), true);
+  assert.equal(exists('database/contract/relations.yaml'), true);
   assert.match(read('apis/backend-api/github/github-backend-api.openapi.json'), /integrations\.list/);
+  assert.match(read('apis/backend-api/github/github-backend-api.openapi.json'), /catalog\.sync/);
+  assert.equal(
+    exists('sdks/_route-manifests/backend-api/sdkwork-router-github-backend-api.route-manifest.json'),
+    true,
+  );
+  assert.equal(exists('configs/topology/cloud.split-services.production.env'), true);
+  assert.match(read('crates/sdkwork-github-api-server/src/http_route_manifest.rs'), /APP_HTTP_ROUTES/);
+  assert.match(read('crates/sdkwork-github-integration-provider-github/src/client.rs'), /fetch_current_user/);
+  assert.match(read('crates/sdkwork-github-integration-provider-github/src/public_api.rs'), /GitHubPublicApiClient/);
+  assert.match(read('crates/sdkwork-github-integration-service/src/service.rs'), /bootstrap_notable_catalog/);
+  assert.match(read('configs/topology/standalone.unified-process.development.env'), /SDKWORK_GITHUB_CATALOG_SYNC_ON_BOOT=true/);
+  assert.match(read('configs/topology/cloud.split-services.production.env'), /SDKWORK_GITHUB_CATALOG_SYNC_ON_BOOT=false/);
 });
 
 test('declares database framework L2 assets and scripts', () => {

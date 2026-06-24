@@ -11,10 +11,9 @@ pub struct GitHubBootstrap {
 pub async fn build_github_bootstrap() -> Result<GitHubBootstrap, String> {
     let host = bootstrap_github_database_from_env().await?;
     let pool = host.pool().clone();
-    Ok(GitHubBootstrap {
-        service: GitHubIntegrationService::new(SqlGitHubStore::new(pool.clone())),
-        pool,
-    })
+    let service = GitHubIntegrationService::new(SqlGitHubStore::new(pool.clone()));
+    super::catalog::maybe_bootstrap_notable_catalog(&service).await?;
+    Ok(GitHubBootstrap { service, pool })
 }
 
 pub async fn build_github_service(

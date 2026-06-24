@@ -19,8 +19,13 @@
   "baseUrl": "http://127.0.0.1:4100",
   "standardProfile": "sdkwork-v3",
   "fixedSdkVersion": "0.1.0",
-  "ownerOnlyOperationCount": 10,
+  "ownerOnlyOperationCount": 11,
   "operations": [
+    {
+      "method": "POST",
+      "operationId": "catalog.bootstrap",
+      "path": "/app/v3/api/github/catalog/bootstrap"
+    },
     {
       "method": "POST",
       "operationId": "integration.link",

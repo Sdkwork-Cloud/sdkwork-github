@@ -8,7 +8,13 @@ use crate::error::ProviderError;
 
 const GITHUB_AUTHORIZE_URL: &str = "https://github.com/login/oauth/authorize";
 const GITHUB_TOKEN_URL: &str = "https://github.com/login/oauth/access_token";
-const DEFAULT_SCOPES: &str = "read:user,repo";
+pub const DEFAULT_SCOPES: &str = "read:user,repo";
+
+#[derive(Clone, Debug)]
+pub struct OAuthExchangeResult {
+    pub access_token: String,
+    pub scope: Option<String>,
+}
 
 #[derive(Clone, Debug)]
 pub struct GitHubOAuthConfig {
@@ -73,7 +79,11 @@ impl GitHubOAuthClient {
         self.config.build_authorization_url(state)
     }
 
-    pub async fn exchange_code(&self, code: &str) -> Result<String, ProviderError> {
+    pub fn configured_scopes(&self) -> &str {
+        self.config.scopes.as_str()
+    }
+
+    pub async fn exchange_code(&self, code: &str) -> Result<OAuthExchangeResult, ProviderError> {
         let started = std::time::Instant::now();
         let response = self
             .client
@@ -119,12 +129,27 @@ impl GitHubOAuthClient {
         })?;
 
         crate::metrics::record_success(started.elapsed());
-        Ok(access_token)
+        Ok(OAuthExchangeResult {
+            access_token,
+            scope: payload.scope,
+        })
     }
 }
 
 #[derive(Debug, Deserialize)]
 struct OAuthTokenResponse {
     access_token: Option<String>,
+    scope: Option<String>,
     error: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::DEFAULT_SCOPES;
+
+    #[test]
+    fn default_scopes_include_user_and_repo() {
+        assert!(DEFAULT_SCOPES.contains("read:user"));
+        assert!(DEFAULT_SCOPES.contains("repo"));
+    }
 }

@@ -20,6 +20,10 @@ where
         .route(paths::ISSUES, get(handlers::list_issues::<S>))
         .route(paths::ISSUES_SYNC, post(handlers::sync_issues::<S>))
         .route(paths::PLANS, get(handlers::list_plans::<S>))
+        .route(
+            paths::CATALOG_BOOTSTRAP,
+            post(handlers::bootstrap_notable_catalog::<S>),
+        )
         .route(paths::INTEGRATION, get(handlers::get_integration_status::<S>))
         .route(paths::INTEGRATION, post(handlers::link_integration::<S>))
         .route(paths::INTEGRATION, delete(handlers::unlink_integration::<S>))

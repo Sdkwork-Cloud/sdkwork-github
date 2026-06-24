@@ -1,7 +1,8 @@
 use async_trait::async_trait;
 
 use crate::domain::{
-    IntegrationStatus, Issue, LinkIntegrationCommand, Page, Plan, ProviderAccount, Repository,
+    IntegrationStatus, Issue, LinkIntegrationCommand, Page, Plan, PlanItem, ProviderAccount,
+    Repository,
 };
 use crate::error::ServiceError;
 
@@ -31,6 +32,11 @@ pub trait GitHubStore: Send + Sync + Clone {
         page: u32,
         page_size: u32,
     ) -> Result<Page<Plan>, ServiceError>;
+
+    async fn list_plan_items_for_plan_ids(
+        &self,
+        plan_ids: &[String],
+    ) -> Result<Vec<PlanItem>, ServiceError>;
 }
 
 #[async_trait]
@@ -38,6 +44,10 @@ pub trait GitHubSyncStore: GitHubStore {
     async fn upsert_repository(&self, repository: &Repository) -> Result<(), ServiceError>;
 
     async fn upsert_issue(&self, issue: &Issue) -> Result<(), ServiceError>;
+
+    async fn upsert_plan(&self, plan: &Plan) -> Result<(), ServiceError>;
+
+    async fn upsert_plan_item(&self, item: &PlanItem) -> Result<(), ServiceError>;
 
     async fn find_active_provider_account(
         &self,
@@ -93,6 +103,8 @@ pub trait GitHubSyncStore: GitHubStore {
         &self,
         state: &str,
     ) -> Result<Option<(String, String)>, ServiceError>;
+
+    async fn purge_expired_oauth_pending(&self) -> Result<(), ServiceError>;
 
     async fn list_admin_integrations(
         &self,

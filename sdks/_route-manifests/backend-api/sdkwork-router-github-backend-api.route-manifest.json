@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.http.route-manifest",
+  "apiSurface": "backend-api",
+  "domain": "github",
+  "crate": "sdkwork-router-github-backend-api",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/github/integrations",
+      "operationId": "integrations.list",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "POST",
+      "path": "/backend/v3/api/github/integrations/sync",
+      "operationId": "integrations.repositories.sync",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "POST",
+      "path": "/backend/v3/api/github/catalog/sync",
+      "operationId": "catalog.sync",
+      "domain": "github",
+      "authMode": "dual-token",
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    }
+  ]
+}

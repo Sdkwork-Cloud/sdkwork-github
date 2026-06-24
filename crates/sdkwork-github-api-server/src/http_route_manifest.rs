@@ -1,82 +1,27 @@
-use sdkwork_web_core::{HttpMethod, HttpRoute, HttpRouteManifest};
+use sdkwork_web_core::{HttpRoute, HttpRouteManifest};
 
-const GITHUB_HTTP_ROUTES: &[HttpRoute] = &[
-    HttpRoute::dual_token(
-        HttpMethod::Get,
-        "/app/v3/api/github/repositories",
-        "github",
-        "repositories.list",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Post,
-        "/app/v3/api/github/repositories/sync",
-        "github",
-        "repositories.sync",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Get,
-        "/app/v3/api/github/issues",
-        "github",
-        "issues.list",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Post,
-        "/app/v3/api/github/issues/sync",
-        "github",
-        "issues.sync",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Get,
-        "/app/v3/api/github/plans",
-        "github",
-        "plans.list",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Get,
-        "/app/v3/api/github/integration",
-        "github",
-        "integration.status",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Post,
-        "/app/v3/api/github/integration",
-        "github",
-        "integration.link",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Delete,
-        "/app/v3/api/github/integration",
-        "github",
-        "integration.unlink",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Post,
-        "/app/v3/api/github/integration/oauth/begin",
-        "github",
-        "integration.oauth.begin",
-    ),
-    HttpRoute::public(
-        HttpMethod::Get,
-        "/app/v3/api/github/integration/oauth/callback",
-        "github",
-        "integration.oauth.callback",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Get,
-        "/backend/v3/api/github/integrations",
-        "github",
-        "integrations.list",
-    ),
-    HttpRoute::dual_token(
-        HttpMethod::Post,
-        "/backend/v3/api/github/integrations/sync",
-        "github",
-        "integrations.repositories.sync",
-    ),
+use sdkwork_router_github_app_api::APP_HTTP_ROUTES;
+use sdkwork_router_github_backend_api::BACKEND_HTTP_ROUTES;
+
+const GITHUB_HTTP_ROUTES: [HttpRoute; 14] = [
+    APP_HTTP_ROUTES[0],
+    APP_HTTP_ROUTES[1],
+    APP_HTTP_ROUTES[2],
+    APP_HTTP_ROUTES[3],
+    APP_HTTP_ROUTES[4],
+    APP_HTTP_ROUTES[5],
+    APP_HTTP_ROUTES[6],
+    APP_HTTP_ROUTES[7],
+    APP_HTTP_ROUTES[8],
+    APP_HTTP_ROUTES[9],
+    APP_HTTP_ROUTES[10],
+    BACKEND_HTTP_ROUTES[0],
+    BACKEND_HTTP_ROUTES[1],
+    BACKEND_HTTP_ROUTES[2],
 ];
 
 pub fn github_route_manifest() -> HttpRouteManifest {
-    HttpRouteManifest::new(GITHUB_HTTP_ROUTES)
+    HttpRouteManifest::new(&GITHUB_HTTP_ROUTES)
 }
 
 pub fn github_public_path_prefixes() -> Vec<String> {

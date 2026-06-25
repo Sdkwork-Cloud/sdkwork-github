@@ -11,6 +11,21 @@
     "appType": "APP_REACT",
     "versionSource": "package.json"
   },
+  "backend": {
+    "profileKey": "backend-root-admin",
+    "ownerMode": "tenant",
+    "grantMode": "current",
+    "platform": "WEB",
+    "appId": "sdkwork-github-pc",
+    "tenantId": "100001",
+    "organizationId": "0",
+    "accessTokenPermissionScope": [
+      "iam.users.read",
+      "iam.organizations.read",
+      "iam.roles.read",
+      "iam.permissions.read"
+    ]
+  },
   "runtime": {
     "family": "browser",
     "framework": "react",
@@ -20,11 +35,11 @@
     "defaultDeploymentProfile": "standalone"
   },
   "sdkDependencies": [
-    { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" },
+    { "sdkFamily": "sdkwork-iam-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" },
     { "sdkFamily": "sdkwork-github-app-sdk", "surface": "app-api", "owner": "sdkwork-github" }
   ],
   "dependencyApiExports": [],
   "dependencyApiSurfaces": [
-    { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "runtimeMode": "embedded-or-split" }
+    { "sdkFamily": "sdkwork-iam-app-sdk", "surface": "app-api", "runtimeMode": "embedded-or-split" }
   ]
 }

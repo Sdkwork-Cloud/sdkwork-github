@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "node scripts/github-dev.mjs --runtime-target browser --database sqlite --service-layout unified-process --deployment-profile standalone",
     "build": "cargo build --workspace",
-    "test": "pnpm topology:validate && pnpm test:contracts && pnpm test:contract:database",
+    "test": "pnpm topology:validate && pnpm test:contracts && pnpm test:contract:database && pnpm test:iam-application-bootstrap-standard",
     "check": "cargo check --workspace && pnpm check:pnpm-script-standard && pnpm check:architecture-alignment && pnpm topology:validate && pnpm db:validate && pnpm api:materialize:check && pnpm sdk:generate:check && pnpm api:check && pnpm typecheck",
     "verify": "cargo test --workspace && pnpm test",
     "typecheck": "pnpm --dir apps/sdkwork-github-pc typecheck",
@@ -25,6 +25,7 @@
     "sdk:generate:check": "node tools/github_sdk_generate.mjs --check",
     "topology:validate": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs validate --root . --spec specs/topology.spec.json",
     "test:contracts": "node --test scripts/verify-github-standard-architecture.test.mjs",
+    "test:iam-application-bootstrap-standard": "node scripts/dev/sdkwork-github-iam-application-bootstrap-standard.test.mjs",
     "db:validate": "node --test scripts/verify-github-database-framework.test.mjs",
     "db:plan": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . plan",
     "db:init": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . init",

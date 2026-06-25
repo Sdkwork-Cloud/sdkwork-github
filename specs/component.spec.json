@@ -30,11 +30,11 @@
     "backendRouteManifest": "sdks/_route-manifests/backend-api/sdkwork-router-github-backend-api.route-manifest.json",
     "sdkClients": ["@sdkwork/github-app-sdk"],
     "sdkDependencies": [
-      { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" }
+      { "sdkFamily": "sdkwork-iam-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" }
     ],
     "dependencyApiExports": [],
     "dependencyApiSurfaces": [
-      { "sdkFamily": "sdkwork-appbase-app-sdk", "surface": "app-api", "runtimeMode": "embedded-or-split" }
+      { "sdkFamily": "sdkwork-iam-app-sdk", "surface": "app-api", "runtimeMode": "embedded-or-split" }
     ],
     "events": [],
     "configKeys": ["specs/topology.spec.json", "configs/topology/*.env"]

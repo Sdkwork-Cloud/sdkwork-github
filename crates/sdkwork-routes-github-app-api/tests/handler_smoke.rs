@@ -5,9 +5,9 @@ use sdkwork_github_integration_repository_sqlx::SqlGitHubStore;
 use sdkwork_github_integration_service::domain::Repository;
 use sdkwork_github_integration_service::ports::GitHubSyncStore;
 use sdkwork_github_integration_service::GitHubIntegrationService;
-use sdkwork_router_github_app_api::dto::PageQuery;
-use sdkwork_router_github_app_api::handlers;
-use sdkwork_router_github_app_api::state::GitHubAppState;
+use sdkwork_routes_github_app_api::dto::PageQuery;
+use sdkwork_routes_github_app_api::handlers;
+use sdkwork_routes_github_app_api::state::GitHubAppState;
 use sdkwork_web_core::{
     ServerRequestId, WebApiSurface, WebAuthMode, WebEnvironment, WebLoginScope, WebRequestContext,
     WebRequestPrincipal, WebTransportFacts,

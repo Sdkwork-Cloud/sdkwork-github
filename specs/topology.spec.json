@@ -72,7 +72,7 @@
   "components": {
     "applicationServer": {
       "crate": "sdkwork-github-api-server",
-      "binary": "sdkwork-github-api-server"
+      "binary": "sdkwork-github-standalone-gateway"
     },
     "cloudGateway": {
       "crate": "sdkwork-api-cloud-gateway-api-server",
@@ -104,7 +104,7 @@
           {
             "id": "application.public-ingress",
             "crate": "sdkwork-github-api-server",
-            "binary": "sdkwork-github-api-server",
+            "binary": "sdkwork-github-standalone-gateway",
             "required": true
           }
         ],
@@ -124,7 +124,7 @@
           {
             "id": "application.public-ingress",
             "crate": "sdkwork-github-api-server",
-            "binary": "sdkwork-github-api-server",
+            "binary": "sdkwork-github-standalone-gateway",
             "required": true
           }
         ],
@@ -145,7 +145,7 @@
           {
             "id": "application.public-ingress",
             "crate": "sdkwork-github-api-server",
-            "binary": "sdkwork-github-api-server",
+            "binary": "sdkwork-github-standalone-gateway",
             "required": true
           }
         ],

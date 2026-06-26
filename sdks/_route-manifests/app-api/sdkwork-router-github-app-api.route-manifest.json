@@ -3,7 +3,7 @@
   "kind": "sdkwork.http.route-manifest",
   "apiSurface": "app-api",
   "domain": "github",
-  "crate": "sdkwork-router-github-app-api",
+  "crate": "sdkwork-routes-github-app-api",
   "routes": [
     {
       "method": "GET",

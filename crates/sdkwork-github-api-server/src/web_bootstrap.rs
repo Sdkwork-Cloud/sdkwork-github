@@ -1,17 +1,17 @@
 use axum::Router;
-use sdkwork_iam_web_adapter::IamDatabaseWebRequestContextResolver;
+use sdkwork_iam_web_adapter::IamWebRequestContextResolver;
 use sdkwork_web_axum::{with_web_request_context, WebFrameworkLayer};
 use sdkwork_web_core::WebRequestContextProfile;
 
 use crate::http_route_manifest::{github_public_path_prefixes, github_route_manifest};
 
 pub async fn wrap_router_with_web_framework_from_env(router: Router) -> Router {
-    let resolver = sdkwork_iam_web_adapter::iam_database_resolver_from_env().await;
+    let resolver = sdkwork_iam_web_adapter::iam_web_request_context_resolver_from_env().await;
     wrap_router_with_web_framework(resolver, router)
 }
 
 fn wrap_router_with_web_framework(
-    resolver: IamDatabaseWebRequestContextResolver,
+    resolver: IamWebRequestContextResolver,
     router: Router,
 ) -> Router {
     let route_manifest = github_route_manifest();

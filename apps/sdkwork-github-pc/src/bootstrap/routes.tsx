@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { SdkworkIamAuthRoutes } from '@sdkwork/auth-pc-react';
+import { SdkworkIamAuthRoutes, SdkworkSessionAuthBrowserRoot } from '@sdkwork/auth-pc-react';
 import { GithubAuthGate } from '@sdkwork/github-pc-core';
 import { AppShell } from '@sdkwork/github-pc-shell';
 import type { GithubPcRuntime } from '@sdkwork/github-pc-core';
@@ -40,9 +40,11 @@ function RoutedAuthGate({ runtime }: { runtime: GithubPcRuntime }) {
 export function GithubAppRoutes({ runtime }: { runtime: GithubPcRuntime }) {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/*" element={<RoutedAuthGate runtime={runtime} />} />
-      </Routes>
+      <SdkworkSessionAuthBrowserRoot>
+        <Routes>
+          <Route path="/*" element={<RoutedAuthGate runtime={runtime} />} />
+        </Routes>
+      </SdkworkSessionAuthBrowserRoot>
     </BrowserRouter>
   );
 }

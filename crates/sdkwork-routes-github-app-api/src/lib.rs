@@ -11,3 +11,14 @@ pub use web_bootstrap::{
     github_app_public_path_prefixes, wrap_router_with_dev_web_framework,
     wrap_router_with_web_framework, wrap_router_with_web_framework_from_env,
 };
+
+pub fn gateway_route_manifest() -> sdkwork_web_core::HttpRouteManifest {
+    app_route_manifest()
+}
+
+pub fn gateway_mount<S>(service: sdkwork_github_integration_service::GitHubIntegrationService<S>) -> axum::Router
+where
+    S: sdkwork_github_integration_service::ports::GitHubSyncStore + Clone + Send + Sync + 'static,
+{
+    routes::build_router(service)
+}

@@ -26,8 +26,8 @@
   "contracts": {
     "publicExports": [],
     "runtimeEntrypoints": ["crates/sdkwork-github-api-server", "apps/sdkwork-github-pc"],
-    "routeManifest": "sdks/_route-manifests/app-api/sdkwork-router-github-app-api.route-manifest.json",
-    "backendRouteManifest": "sdks/_route-manifests/backend-api/sdkwork-router-github-backend-api.route-manifest.json",
+    "routeManifest": "sdks/_route-manifests/app-api/sdkwork-routes-github-app-api.route-manifest.json",
+    "backendRouteManifest": "sdks/_route-manifests/backend-api/sdkwork-routes-github-backend-api.route-manifest.json",
     "sdkClients": ["@sdkwork/github-app-sdk"],
     "sdkDependencies": [
       { "sdkFamily": "sdkwork-iam-app-sdk", "surface": "app-api", "owner": "sdkwork-appbase" }

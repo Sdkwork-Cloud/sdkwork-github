@@ -6,9 +6,9 @@ use sdkwork_github_integration_repository_sqlx::SqlGitHubStore;
 use sdkwork_github_integration_service::domain::LinkIntegrationCommand;
 use sdkwork_github_integration_service::ports::GitHubSyncStore;
 use sdkwork_github_integration_service::GitHubIntegrationService;
-use sdkwork_router_github_backend_api::dto::PageQuery;
-use sdkwork_router_github_backend_api::handlers;
-use sdkwork_router_github_backend_api::state::GitHubBackendState;
+use sdkwork_routes_github_backend_api::dto::PageQuery;
+use sdkwork_routes_github_backend_api::handlers;
+use sdkwork_routes_github_backend_api::state::GitHubBackendState;
 
 async fn migrated_store() -> SqlGitHubStore {
     let config = DatabaseConfig {
@@ -83,7 +83,7 @@ async fn sync_integration_requires_linked_provider() {
     let state = GitHubBackendState::new(service);
     let error = handlers::sync_integration_repositories(
         State(state),
-        axum::Json(sdkwork_router_github_backend_api::dto::AdminSyncRequest {
+        axum::Json(sdkwork_routes_github_backend_api::dto::AdminSyncRequest {
             tenant_id: "tenant-a".to_string(),
             organization_id: "org-a".to_string(),
         }),

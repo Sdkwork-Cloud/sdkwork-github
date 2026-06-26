@@ -11,14 +11,14 @@ const SURFACES = [
     label: 'app-api',
     openapiPath: 'apis/app-api/github/github-app-api.openapi.json',
     manifestPath:
-      'sdks/_route-manifests/app-api/sdkwork-router-github-app-api.route-manifest.json',
+      'sdks/_route-manifests/app-api/sdkwork-routes-github-app-api.route-manifest.json',
     expectedApiSurface: 'app-api',
   },
   {
     label: 'backend-api',
     openapiPath: 'apis/backend-api/github/github-backend-api.openapi.json',
     manifestPath:
-      'sdks/_route-manifests/backend-api/sdkwork-router-github-backend-api.route-manifest.json',
+      'sdks/_route-manifests/backend-api/sdkwork-routes-github-backend-api.route-manifest.json',
     expectedApiSurface: 'backend-api',
   },
 ];

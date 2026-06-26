@@ -24,8 +24,8 @@ const API_INPUTS = [
 ];
 
 const WEB_FRAMEWORK_CRATES = [
-  'crates/sdkwork-router-github-app-api/Cargo.toml',
-  'crates/sdkwork-router-github-backend-api/Cargo.toml',
+  'crates/sdkwork-routes-github-app-api/Cargo.toml',
+  'crates/sdkwork-routes-github-backend-api/Cargo.toml',
   'crates/sdkwork-github-api-server/Cargo.toml',
 ];
 
@@ -75,7 +75,7 @@ test('integrates sdkwork-web-framework in HTTP route crates and api-server', () 
 
 test('integrates sdkwork-utils in Rust crates and PC commons', () => {
   assert.match(read('Cargo.toml'), /sdkwork-utils-rust/);
-  assert.match(read('crates/sdkwork-router-github-app-api/Cargo.toml'), /sdkwork-utils-rust/);
+  assert.match(read('crates/sdkwork-routes-github-app-api/Cargo.toml'), /sdkwork-utils-rust/);
   assert.match(read('crates/sdkwork-github-integration-service/src/service.rs'), /sdkwork_utils_rust::string::is_blank/);
   assert.match(read('apps/sdkwork-github-pc/pnpm-workspace.yaml'), /sdkwork-utils-typescript/);
   assert.match(read('apps/sdkwork-github-pc/packages/sdkwork-github-pc-commons/src/utils/text.ts'), /@sdkwork\/utils/);
@@ -102,7 +102,7 @@ test('database host supports seed on boot lifecycle option', () => {
 });
 
 test('declares handler integration smoke tests', () => {
-  assert.equal(exists('crates/sdkwork-router-github-app-api/tests/handler_smoke.rs'), true);
+  assert.equal(exists('crates/sdkwork-routes-github-app-api/tests/handler_smoke.rs'), true);
 });
 
 test('declares PR verification workflow', () => {
@@ -116,7 +116,7 @@ test('does not declare sdkwork-discovery without RPC services', () => {
 });
 
 test('route manifest declares WebRequestContext and apiSurface', () => {
-  const manifest = readJson('sdks/_route-manifests/app-api/sdkwork-router-github-app-api.route-manifest.json');
+  const manifest = readJson('sdks/_route-manifests/app-api/sdkwork-routes-github-app-api.route-manifest.json');
   for (const route of manifest.routes) {
     assert.equal(route.requestContext, 'WebRequestContext');
     assert.equal(route.apiSurface, 'app-api');
@@ -156,7 +156,7 @@ test('declares production readiness and OAuth alignment surfaces', () => {
   assert.match(read('apis/backend-api/github/github-backend-api.openapi.json'), /integrations\.list/);
   assert.match(read('apis/backend-api/github/github-backend-api.openapi.json'), /catalog\.sync/);
   assert.equal(
-    exists('sdks/_route-manifests/backend-api/sdkwork-router-github-backend-api.route-manifest.json'),
+    exists('sdks/_route-manifests/backend-api/sdkwork-routes-github-backend-api.route-manifest.json'),
     true,
   );
   assert.equal(exists('configs/topology/cloud.split-services.production.env'), true);

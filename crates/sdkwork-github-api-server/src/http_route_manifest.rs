@@ -1,7 +1,7 @@
 use sdkwork_web_core::{HttpRoute, HttpRouteManifest};
 
-use sdkwork_router_github_app_api::APP_HTTP_ROUTES;
-use sdkwork_router_github_backend_api::BACKEND_HTTP_ROUTES;
+use sdkwork_routes_github_app_api::APP_HTTP_ROUTES;
+use sdkwork_routes_github_backend_api::BACKEND_HTTP_ROUTES;
 
 const GITHUB_HTTP_ROUTES: [HttpRoute; 14] = [
     APP_HTTP_ROUTES[0],
@@ -25,10 +25,5 @@ pub fn github_route_manifest() -> HttpRouteManifest {
 }
 
 pub fn github_public_path_prefixes() -> Vec<String> {
-    vec![
-        "/health".to_string(),
-        "/healthz".to_string(),
-        "/readyz".to_string(),
-        "/metrics".to_string(),
-    ]
+    sdkwork_web_bootstrap::infra_public_path_prefixes()
 }

@@ -82,8 +82,8 @@ async fn list_repositories_returns_tenant_scoped_rows() {
     store
         .upsert_repository(&Repository {
             id: "github-repo-test-1".to_owned(),
-            tenant_id: "tenant-a".to_owned(),
-            organization_id: "org-a".to_owned(),
+            tenant_id: "100001".to_owned(),
+            organization_id: "0".to_owned(),
             full_name: "sdkwork/test".to_owned(),
             owner: "sdkwork".to_owned(),
             description: None,
@@ -100,7 +100,7 @@ async fn list_repositories_returns_tenant_scoped_rows() {
     let state = GitHubAppState::new(service);
     let response = handlers::list_repositories(
         State(state),
-        test_context("tenant-a", "org-a"),
+        test_context("100001", "0"),
         Query(PageQuery {
             tenant_id: None,
             organization_id: None,
@@ -124,7 +124,7 @@ async fn integration_status_is_unlinked_by_default() {
     let state = GitHubAppState::new(service);
     let response = handlers::get_integration_status(
         State(state),
-        test_context("tenant-a", "org-a"),
+        test_context("100001", "0"),
         Query(PageQuery {
             tenant_id: None,
             organization_id: None,
@@ -152,7 +152,7 @@ async fn oauth_begin_requires_oauth_configuration() {
     let state = GitHubAppState::new(service);
     let error = handlers::begin_oauth_integration(
         State(state),
-        test_context("tenant-a", "org-a"),
+        test_context("100001", "0"),
         Query(PageQuery {
             tenant_id: None,
             organization_id: None,
@@ -175,8 +175,8 @@ async fn list_plans_returns_nested_checklist_items() {
     store
         .upsert_plan(&sdkwork_github_integration_service::domain::Plan {
             id: "github-plan-test-1".to_owned(),
-            tenant_id: "tenant-a".to_owned(),
-            organization_id: "org-a".to_owned(),
+            tenant_id: "100001".to_owned(),
+            organization_id: "0".to_owned(),
             repository_id: Some("github-repo-test-1".to_owned()),
             title: "Launch checklist".to_owned(),
             status: "active".to_owned(),
@@ -203,7 +203,7 @@ async fn list_plans_returns_nested_checklist_items() {
     let state = GitHubAppState::new(service);
     let response = handlers::list_plans(
         State(state),
-        test_context("tenant-a", "org-a"),
+        test_context("100001", "0"),
         Query(PageQuery {
             tenant_id: None,
             organization_id: None,

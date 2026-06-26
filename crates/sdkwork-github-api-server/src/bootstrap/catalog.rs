@@ -12,9 +12,9 @@ pub async fn maybe_bootstrap_notable_catalog(
     }
 
     let tenant_id = std::env::var("SDKWORK_GITHUB_CATALOG_TENANT_ID")
-        .unwrap_or_else(|_| "tenant-demo".to_string());
+        .unwrap_or_else(|_| "100001".to_string());
     let organization_id = std::env::var("SDKWORK_GITHUB_CATALOG_ORGANIZATION_ID")
-        .unwrap_or_else(|_| "org-demo".to_string());
+        .unwrap_or_else(|_| "0".to_string());
 
     let result = match service
         .bootstrap_notable_catalog(&tenant_id, &organization_id)

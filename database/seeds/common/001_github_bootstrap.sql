@@ -4,8 +4,8 @@ INSERT OR IGNORE INTO github_repository (
     id, tenant_id, organization_id, full_name, owner, description, default_branch, html_url, is_private, created_at, updated_at
 ) VALUES (
     'github-repo-demo-1',
-    'tenant-demo',
-    'org-demo',
+    '100001',
+    '0',
     'sdkwork/github-demo',
     'sdkwork',
     'Demo repository for SDKWork GitHub integration',
@@ -20,8 +20,8 @@ INSERT OR IGNORE INTO github_issue (
     id, tenant_id, organization_id, repository_id, number, title, state, html_url, created_at, updated_at
 ) VALUES (
     'github-issue-demo-1',
-    'tenant-demo',
-    'org-demo',
+    '100001',
+    '0',
     'github-repo-demo-1',
     1,
     'Bootstrap issue',
@@ -35,8 +35,8 @@ INSERT OR IGNORE INTO github_plan (
     id, tenant_id, organization_id, repository_id, title, status, created_at, updated_at
 ) VALUES (
     'github-plan-demo-1',
-    'tenant-demo',
-    'org-demo',
+    '100001',
+    '0',
     'github-repo-demo-1',
     'Launch checklist',
     'active',

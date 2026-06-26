@@ -46,8 +46,8 @@ async fn list_integrations_returns_linked_accounts() {
     let store = migrated_store().await;
     store
         .link_integration(
-            "tenant-a",
-            "org-a",
+            "100001",
+            "0",
             "github",
             &LinkIntegrationCommand {
                 access_token: "ghp_test".to_string(),
@@ -72,8 +72,8 @@ async fn list_integrations_returns_linked_accounts() {
     .expect("list integrations");
 
     assert_eq!(response.0.items.len(), 1);
-    assert_eq!(response.0.items[0].tenant_id, "tenant-a");
-    assert_eq!(response.0.items[0].organization_id, "org-a");
+    assert_eq!(response.0.items[0].tenant_id, "100001");
+    assert_eq!(response.0.items[0].organization_id, "0");
 }
 
 #[tokio::test]
@@ -84,8 +84,8 @@ async fn sync_integration_requires_linked_provider() {
     let error = handlers::sync_integration_repositories(
         State(state),
         axum::Json(sdkwork_routes_github_backend_api::dto::AdminSyncRequest {
-            tenant_id: "tenant-a".to_string(),
-            organization_id: "org-a".to_string(),
+            tenant_id: "100001".to_string(),
+            organization_id: "0".to_string(),
         }),
     )
     .await

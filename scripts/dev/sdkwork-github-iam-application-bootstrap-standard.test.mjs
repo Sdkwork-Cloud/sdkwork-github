@@ -12,10 +12,10 @@ function read(relativePath, root = repoRoot) {
 }
 
 const bootstrapSource = read(
-  'crates/sdkwork-github-api-server/src/bootstrap/iam_application_bootstrap.rs',
+  'crates/sdkwork-github-standalone-gateway/src/bootstrap/iam_application_bootstrap.rs',
 );
-const routersSource = read('crates/sdkwork-github-api-server/src/bootstrap/routers.rs');
-const apiServerCargo = read('crates/sdkwork-github-api-server/Cargo.toml');
+const routersSource = read('crates/sdkwork-github-standalone-gateway/src/bootstrap/routers.rs');
+const apiServerCargo = read('crates/sdkwork-github-standalone-gateway/Cargo.toml');
 const workspaceCargo = read('Cargo.toml');
 const devScript = read('scripts/github-dev.mjs');
 const sharedBootstrapSource = read(

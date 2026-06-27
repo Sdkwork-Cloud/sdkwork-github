@@ -7,7 +7,7 @@ members = [
     "crates/sdkwork-github-database-host",
     "crates/sdkwork-routes-github-app-api",
     "crates/sdkwork-routes-github-backend-api",
-    "crates/sdkwork-github-api-server",
+    "crates/sdkwork-github-standalone-gateway",
 ]
 resolver = "2"
 

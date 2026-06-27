@@ -11,5 +11,6 @@ path = "src/lib.rs"
 [dependencies]
 axum.workspace = true
 tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
+sdkwork-github-integration-service.workspace = true
 sdkwork_routes_github_app_api = { package = "sdkwork-routes-github-app-api", path = "../sdkwork-routes-github-app-api" }
 sdkwork_routes_github_backend_api = { package = "sdkwork-routes-github-backend-api", path = "../sdkwork-routes-github-backend-api" }

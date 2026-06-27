@@ -1,4 +1,4 @@
-use sdkwork_github_api_server::build_router;
+use sdkwork_github_standalone_gateway::build_router;
 
 #[tokio::main]
 async fn main() {
@@ -13,12 +13,12 @@ async fn main() {
         .unwrap_or_else(|_| "127.0.0.1:4100".to_string());
     let app = build_router()
         .await
-        .expect("github api-server bootstrap failed");
+        .expect("github standalone-gateway bootstrap failed");
     let listener = tokio::net::TcpListener::bind(&bind_address)
         .await
-        .expect("bind github api-server listener failed");
-    tracing::info!("sdkwork-github-api-server listening on {bind_address}");
+        .expect("bind github standalone-gateway listener failed");
+    tracing::info!("sdkwork-github-standalone-gateway listening on {bind_address}");
     axum::serve(listener, app)
         .await
-        .expect("serve github api-server failed");
+        .expect("serve github standalone-gateway failed");
 }

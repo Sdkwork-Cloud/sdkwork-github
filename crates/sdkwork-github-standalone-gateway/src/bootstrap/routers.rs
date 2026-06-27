@@ -62,13 +62,9 @@ pub async fn build_router() -> Result<Router, Box<dyn std::error::Error + Send +
         .await
         .map_err(|error| -> Box<dyn std::error::Error + Send + Sync> { error.into() })?;
 
-    let github_app_router = sdkwork_routes_github_app_api::routes::build_router(service.clone());
-    let github_backend_router =
-        sdkwork_routes_github_backend_api::build_router(service);
+    let domain = sdkwork_github_gateway_assembly::assemble_application_business_router(service.clone()).router;
 
-    let protected = Router::new()
-        .merge(github_app_router)
-        .merge(github_backend_router);
+    let protected = build_protected_router(domain).await;
 
     let business = Router::new()
         .merge(iam_router)

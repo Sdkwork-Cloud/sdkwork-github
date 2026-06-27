@@ -1,7 +1,6 @@
 use sdkwork_web_core::{HttpRoute, HttpRouteManifest};
 
-use sdkwork_routes_github_app_api::APP_HTTP_ROUTES;
-use sdkwork_routes_github_backend_api::BACKEND_HTTP_ROUTES;
+use sdkwork_github_gateway_assembly::{APP_HTTP_ROUTES, BACKEND_HTTP_ROUTES};
 
 const GITHUB_HTTP_ROUTES: [HttpRoute; 14] = [
     APP_HTTP_ROUTES[0],

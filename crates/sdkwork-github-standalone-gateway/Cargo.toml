@@ -1,10 +1,11 @@
 [package]
-name = "sdkwork-github-api-server"
+name = "sdkwork-github-standalone-gateway"
 version.workspace = true
 edition.workspace = true
 
+
 [[bin]]
-name = "sdkwork-github-api-server"
+name = "sdkwork-github-standalone-gateway"
 path = "src/main.rs"
 
 [dependencies]
@@ -19,8 +20,6 @@ sdkwork-github-integration-service.workspace = true
 sdkwork-github-integration-repository-sqlx.workspace = true
 sdkwork-github-integration-provider-github.workspace = true
 sdkwork-github-database-host.workspace = true
-sdkwork-routes-github-app-api.workspace = true
-sdkwork-routes-github-backend-api.workspace = true
 sdkwork-web-core.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork-web-bootstrap.workspace = true
@@ -33,6 +32,4 @@ sdkwork-database-sqlx.workspace = true
 sdkwork-utils-rust.workspace = true
 sqlx.workspace = true
 
-[[bin]]
-name = "sdkwork-github-standalone-gateway"
-path = "src/main.rs"
+

@@ -7,3 +7,7 @@ dist/
 !.env.example
 *.sqlite
 *.db
+
+# SDKWork local runtime state
+.runtime/
+**/.runtime/

@@ -11,3 +11,5 @@ pub use sdkwork_routes_github_backend_api::{backend_route_manifest, BACKEND_HTTP
 pub fn assembly_route_count() -> usize {
     generated::ROUTE_CRATE_COUNT
 }
+
+pub use generated::ROUTE_CRATE_PACKAGES;

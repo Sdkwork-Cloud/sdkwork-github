@@ -75,6 +75,7 @@ test('integrates sdkwork-web-framework in HTTP route crates and standalone-gatew
 
 test('integrates sdkwork-utils in Rust crates and PC commons', () => {
   assert.match(read('Cargo.toml'), /sdkwork-utils-rust/);
+  assert.match(read('crates/sdkwork-routes-github-common/Cargo.toml'), /sdkwork-utils-rust/);
   assert.match(read('crates/sdkwork-routes-github-app-api/Cargo.toml'), /sdkwork-utils-rust/);
   assert.match(read('crates/sdkwork-github-integration-service/src/service.rs'), /sdkwork_utils_rust::string::is_blank/);
   assert.match(read('apps/sdkwork-github-pc/pnpm-workspace.yaml'), /sdkwork-utils-typescript/);
@@ -113,6 +114,12 @@ test('declares PR verification workflow', () => {
 test('does not declare sdkwork-discovery without RPC services', () => {
   assert.doesNotMatch(read('Cargo.toml'), /sdkwork-discovery/);
   assert.equal(exists('apis/rpc'), false);
+});
+
+test('route handlers use SdkWorkApiResponse envelope helpers', () => {
+  assert.match(read('crates/sdkwork-routes-github-common/src/response.rs'), /SdkWorkApiResponse::success/);
+  assert.match(read('crates/sdkwork-routes-github-app-api/src/handlers.rs'), /finish_api_json/);
+  assert.match(read('crates/sdkwork-routes-github-backend-api/src/handlers.rs'), /finish_api_json/);
 });
 
 test('route manifest declares WebRequestContext and apiSurface', () => {

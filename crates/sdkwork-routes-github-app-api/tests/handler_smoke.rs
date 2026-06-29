@@ -1,4 +1,7 @@
+use axum::body::to_bytes;
 use axum::extract::{Query, State};
+use axum::response::Response;
+use http::StatusCode;
 use sdkwork_database_config::{DatabaseConfig, DatabaseEngine};
 use sdkwork_database_sqlx::{create_pool_from_config, DatabasePool};
 use sdkwork_github_integration_repository_sqlx::SqlGitHubStore;
@@ -56,6 +59,7 @@ fn test_context(tenant_id: &str, organization_id: &str) -> WebRequestContext {
             access_token_present: true,
             api_key_present: false,
             oauth_bearer_present: false,
+            agent_token_present: false,
         },
         principal: Some(
             WebRequestPrincipal::builder()
@@ -71,8 +75,15 @@ fn test_context(tenant_id: &str, organization_id: &str) -> WebRequestContext {
         locale: None,
         client_kind: None,
         operation: None,
-        trace_id: None,
+        trace_id: Some("trace-test".to_owned()),
     }
+}
+
+async fn response_json(response: Response) -> serde_json::Value {
+    let body = to_bytes(response.into_body(), usize::MAX)
+        .await
+        .expect("read response body");
+    serde_json::from_slice(&body).expect("parse response json")
 }
 
 #[tokio::test]
@@ -110,11 +121,16 @@ async fn list_repositories_returns_tenant_scoped_rows() {
             repository_id: None,
         }),
     )
-    .await
-    .expect("list repositories");
+    .await;
+    let payload = response_json(response).await;
 
-    assert_eq!(response.0.items.len(), 1);
-    assert_eq!(response.0.items[0].full_name, "sdkwork/test");
+    assert_eq!(payload["code"], 0);
+    assert_eq!(payload["data"]["items"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        payload["data"]["items"][0]["full_name"].as_str().unwrap(),
+        "sdkwork/test"
+    );
+    assert_eq!(payload["data"]["pageInfo"]["mode"].as_str().unwrap(), "offset");
 }
 
 #[tokio::test]
@@ -134,11 +150,12 @@ async fn integration_status_is_unlinked_by_default() {
             repository_id: None,
         }),
     )
-    .await
-    .expect("integration status");
+    .await;
+    let payload = response_json(response).await;
 
-    assert_eq!(response.0.provider, "github");
-    assert!(!response.0.linked);
+    assert_eq!(payload["code"], 0);
+    assert_eq!(payload["data"]["item"]["provider"].as_str().unwrap(), "github");
+    assert_eq!(payload["data"]["item"]["linked"].as_bool().unwrap(), false);
 }
 
 #[tokio::test]
@@ -150,7 +167,7 @@ async fn oauth_begin_requires_oauth_configuration() {
     let store = migrated_store().await;
     let service = GitHubIntegrationService::new(store);
     let state = GitHubAppState::new(service);
-    let error = handlers::begin_oauth_integration(
+    let response = handlers::begin_oauth_integration(
         State(state),
         test_context("100001", "0"),
         Query(PageQuery {
@@ -162,10 +179,9 @@ async fn oauth_begin_requires_oauth_configuration() {
             repository_id: None,
         }),
     )
-    .await
-    .expect_err("oauth begin should fail without configuration");
+    .await;
 
-    assert_eq!(error.0, http::StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
 }
 
 #[tokio::test]
@@ -213,14 +229,17 @@ async fn list_plans_returns_nested_checklist_items() {
             repository_id: None,
         }),
     )
-    .await
-    .expect("list plans");
+    .await;
+    let payload = response_json(response).await;
 
-    assert_eq!(response.0.items.len(), 1);
-    assert_eq!(response.0.items[0].title, "Launch checklist");
-    assert_eq!(response.0.items[0].items.len(), 1);
+    assert_eq!(payload["data"]["items"].as_array().unwrap().len(), 1);
     assert_eq!(
-        response.0.items[0].items[0].issue_id.as_deref(),
-        Some("github-issue-test-1")
+        payload["data"]["items"][0]["title"].as_str().unwrap(),
+        "Launch checklist"
+    );
+    assert_eq!(payload["data"]["items"][0]["items"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        payload["data"]["items"][0]["items"][0]["issue_id"].as_str().unwrap(),
+        "github-issue-test-1"
     );
 }

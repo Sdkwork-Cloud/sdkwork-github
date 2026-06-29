@@ -5,6 +5,7 @@ members = [
     "crates/sdkwork-github-integration-repository-sqlx",
     "crates/sdkwork-github-integration-provider-github",
     "crates/sdkwork-github-database-host",
+    "crates/sdkwork-routes-github-common",
     "crates/sdkwork-routes-github-app-api",
     "crates/sdkwork-routes-github-backend-api",
     "crates/sdkwork-github-standalone-gateway",
@@ -35,6 +36,7 @@ sdkwork-github-integration-service = { path = "crates/sdkwork-github-integration
 sdkwork-github-integration-repository-sqlx = { path = "crates/sdkwork-github-integration-repository-sqlx" }
 sdkwork-github-integration-provider-github = { path = "crates/sdkwork-github-integration-provider-github" }
 sdkwork-github-database-host = { path = "crates/sdkwork-github-database-host" }
+sdkwork-routes-github-common = { path = "crates/sdkwork-routes-github-common" }
 sdkwork-routes-github-app-api = { path = "crates/sdkwork-routes-github-app-api" }
 sdkwork-routes-github-backend-api = { path = "crates/sdkwork-routes-github-backend-api" }
 sdkwork-utils-rust = { path = "../sdkwork-utils/packages/sdkwork-utils-rust" }

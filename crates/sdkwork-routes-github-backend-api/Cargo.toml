@@ -12,12 +12,15 @@ axum.workspace = true
 http.workspace = true
 serde.workspace = true
 sdkwork-github-integration-service.workspace = true
+sdkwork-routes-github-common.workspace = true
 sdkwork-web-core.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork_iam_web_adapter.workspace = true
 
 [dev-dependencies]
 tokio.workspace = true
+serde_json.workspace = true
+sdkwork-web-core.workspace = true
 sqlx.workspace = true
 sdkwork-database-config.workspace = true
 sdkwork-database-sqlx.workspace = true

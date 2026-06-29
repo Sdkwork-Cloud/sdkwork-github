@@ -1,6 +1,5 @@
 use std::future::Future;
 use std::pin::Pin;
-use std::sync::Arc;
 
 use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_web_bootstrap::ReadinessCheck;

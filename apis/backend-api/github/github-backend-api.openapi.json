@@ -23,22 +23,68 @@
       "get": {
         "summary": "List active GitHub integrations across tenants.",
         "operationId": "integrations.list",
-        "tags": ["github"],
-        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "tags": [
+          "github"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
         "parameters": [
-          { "$ref": "#/components/parameters/PageQuery" },
-          { "$ref": "#/components/parameters/PageSizeQuery" }
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeQuery"
+          }
         ],
         "responses": {
           "200": {
             "description": "Integration page.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AdminIntegrationPage" }
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "data"
+                      ],
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "items",
+                            "pageInfo"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/AdminIntegrationView"
+                              }
+                            },
+                            "pageInfo": {
+                              "$ref": "#/components/schemas/PageInfo"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             }
           },
-          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+          "default": {
+            "$ref": "#/components/responses/ProblemDetailResponse"
+          }
         },
         "x-sdkwork-owner": "sdkwork-github",
         "x-sdkwork-api-authority": "sdkwork-github-backend-api",
@@ -53,13 +99,22 @@
       "post": {
         "summary": "Trigger repository sync for a tenant integration.",
         "operationId": "integrations.repositories.sync",
-        "tags": ["github"],
-        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "tags": [
+          "github"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AdminSyncRequest" }
+              "schema": {
+                "$ref": "#/components/schemas/AdminSyncRequest"
+              }
             }
           }
         },
@@ -68,11 +123,38 @@
             "description": "Sync result.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/SyncResult" }
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "data"
+                      ],
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/SyncResult"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             }
           },
-          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+          "default": {
+            "$ref": "#/components/responses/ProblemDetailResponse"
+          }
         },
         "x-sdkwork-owner": "sdkwork-github",
         "x-sdkwork-api-authority": "sdkwork-github-backend-api",
@@ -87,13 +169,22 @@
       "post": {
         "summary": "Bootstrap notable public GitHub repositories for a tenant scope.",
         "operationId": "catalog.sync",
-        "tags": ["github"],
-        "security": [{ "AuthToken": [], "AccessToken": [] }],
+        "tags": [
+          "github"
+        ],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AdminSyncRequest" }
+              "schema": {
+                "$ref": "#/components/schemas/AdminSyncRequest"
+              }
             }
           }
         },
@@ -102,11 +193,38 @@
             "description": "Catalog bootstrap result.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/CatalogBootstrapResult" }
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SdkWorkApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "data"
+                      ],
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "required": [
+                            "item"
+                          ],
+                          "properties": {
+                            "item": {
+                              "$ref": "#/components/schemas/CatalogBootstrapResult"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             }
           },
-          "default": { "$ref": "#/components/responses/ProblemDetailResponse" }
+          "default": {
+            "$ref": "#/components/responses/ProblemDetailResponse"
+          }
         },
         "x-sdkwork-owner": "sdkwork-github",
         "x-sdkwork-api-authority": "sdkwork-github-backend-api",
@@ -123,56 +241,115 @@
       "PageQuery": {
         "name": "page",
         "in": "query",
-        "schema": { "type": "integer", "minimum": 1, "default": 1 }
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
       },
       "PageSizeQuery": {
         "name": "page_size",
         "in": "query",
-        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
       }
     },
     "schemas": {
       "AdminIntegrationPage": {
         "type": "object",
-        "required": ["items", "page", "page_size", "total"],
+        "required": [
+          "items",
+          "page",
+          "page_size",
+          "total"
+        ],
         "properties": {
           "items": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/AdminIntegrationView" }
+            "items": {
+              "$ref": "#/components/schemas/AdminIntegrationView"
+            }
           },
-          "page": { "type": "integer" },
-          "page_size": { "type": "integer" },
-          "total": { "type": "integer" }
+          "page": {
+            "type": "integer"
+          },
+          "page_size": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
         }
       },
       "AdminIntegrationView": {
         "type": "object",
-        "required": ["tenant_id", "organization_id", "provider", "linked"],
+        "required": [
+          "tenant_id",
+          "organization_id",
+          "provider",
+          "linked"
+        ],
         "properties": {
-          "tenant_id": { "type": "string" },
-          "organization_id": { "type": "string" },
-          "provider": { "type": "string" },
-          "linked": { "type": "boolean" },
-          "status": { "type": "string" },
-          "external_account_id": { "type": "string" },
-          "scopes": { "type": "string" },
-          "last_synced_at": { "type": "string", "format": "date-time" }
+          "tenant_id": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "linked": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "external_account_id": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "string"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "AdminSyncRequest": {
         "type": "object",
-        "required": ["tenant_id", "organization_id"],
+        "required": [
+          "tenant_id",
+          "organization_id"
+        ],
         "properties": {
-          "tenant_id": { "type": "string" },
-          "organization_id": { "type": "string" }
+          "tenant_id": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          }
         }
       },
       "SyncResult": {
         "type": "object",
-        "required": ["provider", "synced_count"],
+        "required": [
+          "provider",
+          "synced_count"
+        ],
         "properties": {
-          "provider": { "type": "string" },
-          "synced_count": { "type": "integer", "minimum": 0 }
+          "provider": {
+            "type": "string"
+          },
+          "synced_count": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
       },
       "CatalogBootstrapResult": {
@@ -184,11 +361,275 @@
           "plan_items_created"
         ],
         "properties": {
-          "repositories_synced": { "type": "integer", "minimum": 0 },
-          "issues_synced": { "type": "integer", "minimum": 0 },
-          "plans_created": { "type": "integer", "minimum": 0 },
-          "plan_items_created": { "type": "integer", "minimum": 0 }
+          "repositories_synced": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "issues_synced": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "plans_created": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "plan_items_created": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
+      },
+      "SdkWorkApiResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "data",
+          "traceId"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0
+            ],
+            "default": 0,
+            "minimum": 0,
+            "maximum": 0
+          },
+          "data": {
+            "description": "Operation-specific payload typed per response schema."
+          },
+          "traceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Server-owned request correlation id."
+          }
+        }
+      },
+      "SdkWorkResourceData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "item"
+        ],
+        "properties": {
+          "item": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Typed domain resource for the operation."
+          }
+        }
+      },
+      "SdkWorkPageData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      },
+      "SdkWorkCommandData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "accepted"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "boolean",
+            "const": true
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PageInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "offset",
+              "cursor"
+            ]
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "totalItems": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SdkWorkPlatformErrorCode": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 40001,
+        "maximum": 79999,
+        "description": "Platform or domain error code per API_SPEC.md §15.3."
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "traceId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          },
+          "code": {
+            "$ref": "#/components/schemas/SdkWorkPlatformErrorCode"
+          },
+          "traceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Server-owned request correlation id."
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          }
+        }
+      },
+      "FieldError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "message"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 40011,
+            "maximum": 40099
+          }
+        }
+      },
+      "SdkWorkResourceResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SdkWorkApiResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/SdkWorkResourceData"
+              }
+            }
+          }
+        ]
+      },
+      "SdkWorkListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SdkWorkApiResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/SdkWorkPageData"
+              }
+            }
+          }
+        ]
+      },
+      "SdkWorkCommandResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SdkWorkApiResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/SdkWorkCommandData"
+              }
+            }
+          }
+        ]
       }
     },
     "responses": {
@@ -196,14 +637,23 @@
         "description": "Problem Details",
         "content": {
           "application/problem+json": {
-            "schema": { "type": "object" }
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
+            }
           }
         }
       }
     },
     "securitySchemes": {
-      "AuthToken": { "type": "http", "scheme": "bearer" },
-      "AccessToken": { "type": "apiKey", "in": "header", "name": "Access-Token" }
+      "AuthToken": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "AccessToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Access-Token"
+      }
     }
   }
 }

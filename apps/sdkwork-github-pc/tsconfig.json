@@ -11,6 +11,9 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "paths": {
+      "@sdkwork/utils": [
+        "../../../sdkwork-utils/packages/sdkwork-utils-typescript/src/index.ts"
+      ],
       "@sdkwork/iam-app-sdk": [
         "../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript/generated/server-openapi/src/index.ts"
       ],
@@ -21,7 +24,7 @@
         "./src/bootstrap/sdkworkAuthPcReactShim.d.ts"
       ],
       "@sdkwork/auth-runtime-pc-react": [
-        "../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-runtime-pc-react/src/index.ts"
+        "./packages/sdkwork-github-pc-core/src/iam/sdkworkAuthRuntimePcReactShim.d.ts"
       ],
       "@sdkwork/core-pc-react": [
         "../../../sdkwork-core/sdkwork-core-pc-react/src/index.ts"

@@ -1,11 +1,10 @@
 use axum::Router;
 use axum::http::{HeaderValue, Method};
-use std::sync::Arc;
 use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 
 use crate::bootstrap::auth::build_protected_router;
 use crate::bootstrap::database::build_github_bootstrap;
-use crate::readiness::GithubDatabaseReadinessCheck;
+use crate::health::{http_metrics_registry, ready_check};
 use sdkwork_web_bootstrap::{service_router, ServiceRouterConfig};
 
 fn build_cors_layer() -> CorsLayer {
@@ -73,8 +72,8 @@ pub async fn build_router() -> Result<Router, Box<dyn std::error::Error + Send +
 
     Ok(service_router(
         business,
-        ServiceRouterConfig::default().with_readiness_check(Arc::new(
-            GithubDatabaseReadinessCheck::new(pool),
-        )),
+        ServiceRouterConfig::default()
+            .with_readiness_check(ready_check(pool))
+            .with_metrics(http_metrics_registry()),
     ))
 }

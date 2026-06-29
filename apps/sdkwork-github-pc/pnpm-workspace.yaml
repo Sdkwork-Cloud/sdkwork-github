@@ -6,6 +6,7 @@ packages:
   - ../../../sdkwork-iam/sdks/sdkwork-iam-backend-sdk/sdkwork-iam-backend-sdk-typescript/generated/server-openapi
   - ../../../sdkwork-appbase/packages/common/foundation/sdkwork-runtime-bootstrap
   - ../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-contracts
+  - ../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-credential-entry
   - ../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-sdk-adapter
   - ../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-sdk-ports
   - ../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-runtime
@@ -14,6 +15,7 @@ packages:
   - ../../../sdkwork-appbase/packages/pc-react/foundation/sdkwork-i18n-pc-react
   - ../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-pc-react
   - ../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-runtime-pc-react
+  - ../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-user-center-core-pc-react
   - ../../../sdkwork-core/sdkwork-core-pc-react
   - ../../../sdkwork-ui/sdkwork-ui-pc-react
   - ../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript

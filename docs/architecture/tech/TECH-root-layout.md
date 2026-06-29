@@ -1,7 +1,6 @@
-> Migrated from `docs/root-layout.md` on 2026-06-24.
-> Owner: SDKWork maintainers
-
 # Root Layout
+
+Owner: SDKWork maintainers
 
 SDKWork GitHub uses the standard project-root dictionary.
 

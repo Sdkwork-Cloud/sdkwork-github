@@ -74,12 +74,18 @@ test('integrates sdkwork-web-framework in HTTP route crates and standalone-gatew
 });
 
 test('integrates sdkwork-utils in Rust crates and PC commons', () => {
+  assert.equal(exists('pnpm-workspace.yaml'), true);
+  assert.match(read('pnpm-workspace.yaml'), /apps\/sdkwork-github-pc/);
   assert.match(read('Cargo.toml'), /sdkwork-utils-rust/);
   assert.match(read('crates/sdkwork-routes-github-common/Cargo.toml'), /sdkwork-utils-rust/);
   assert.match(read('crates/sdkwork-routes-github-app-api/Cargo.toml'), /sdkwork-utils-rust/);
   assert.match(read('crates/sdkwork-github-integration-service/src/service.rs'), /sdkwork_utils_rust::string::is_blank/);
-  assert.match(read('apps/sdkwork-github-pc/pnpm-workspace.yaml'), /sdkwork-utils-typescript/);
+  assert.match(read('pnpm-workspace.yaml'), /sdkwork-utils-typescript/);
   assert.match(read('apps/sdkwork-github-pc/packages/sdkwork-github-pc-commons/src/utils/text.ts'), /@sdkwork\/utils/);
+  assert.match(
+    read('apps/sdkwork-github-pc/packages/sdkwork-github-pc-core/src/composition/dependency-manifest.ts'),
+    /specs\/component\.spec\.json/,
+  );
 });
 
 test('integrates sdkwork-database lifecycle host in standalone-gateway bootstrap', () => {
@@ -92,7 +98,7 @@ test('integrates sdkwork-database lifecycle host in standalone-gateway bootstrap
 test('integrates GitHub provider adapter for external sync', () => {
   assert.equal(exists('crates/sdkwork-github-integration-provider-github/src/client.rs'), true);
   assert.equal(exists('crates/sdkwork-github-integration-provider-github/src/credential.rs'), true);
-  assert.equal(exists('database/migrations/sqlite/0002_github_provider_account.sql'), true);
+  assert.equal(exists('database/ddl/baseline/sqlite/0001_github_baseline.sql'), true);
   assert.match(read('crates/sdkwork-github-integration-service/src/service.rs'), /link_integration/);
   assert.match(read('apis/app-api/github/github-app-api.openapi.json'), /integration\.link/);
 });
@@ -156,8 +162,7 @@ test('declares production readiness and OAuth alignment surfaces', () => {
   assert.match(read('crates/sdkwork-github-standalone-gateway/src/health.rs'), /metrics_snapshot/);
   assert.match(read('apis/app-api/github/github-app-api.openapi.json'), /integration\.oauth\.begin/);
   assert.match(read('apis/app-api/github/github-app-api.openapi.json'), /catalog\.bootstrap/);
-  assert.equal(exists('database/migrations/sqlite/0003_github_oauth_pending.sql'), true);
-  assert.equal(exists('database/migrations/sqlite/0004_github_referential_integrity.sql'), true);
+  assert.equal(exists('database/ddl/baseline/sqlite/0001_github_baseline.sql'), true);
   assert.equal(exists('database/catalog/notable-github-repositories.json'), true);
   assert.equal(exists('database/contract/relations.yaml'), true);
   assert.match(read('apis/backend-api/github/github-backend-api.openapi.json'), /integrations\.list/);
@@ -183,8 +188,8 @@ test('declares database framework L2 assets and scripts', () => {
   for (const relativePath of [
     'database/contract/prefix-registry.json',
     'database/seeds/seed.manifest.json',
-    'database/ddl/baseline/sqlite/0001_github_legacy_baseline.sql',
-    'database/ddl/baseline/postgres/0001_github_legacy_baseline.sql',
+    'database/ddl/baseline/sqlite/0001_github_baseline.sql',
+    'database/ddl/baseline/postgres/0001_github_baseline.sql',
     'sdks/sdkwork-github-app-sdk/sdk-manifest.json',
     'apps/sdkwork-github-pc/src/bootstrap/createGithubPcRuntime.ts',
     'apps/sdkwork-github-pc/config/browser/runtime-env.development.example.json',

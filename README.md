@@ -1,4 +1,5 @@
 # SDKWork GitHub
+repository-kind: application
 
 GitHub integration application for repository management, issues, feature checklists, and planning.
 

@@ -32,18 +32,12 @@ async fn migrated_store() -> SqlGitHubStore {
 
 async fn install_schema(pool: DatabasePool) {
     let sqlite = pool.as_sqlite().expect("sqlite pool");
-    let baseline = include_str!("../../../database/ddl/baseline/sqlite/0001_github_legacy_baseline.sql");
-    let migration = include_str!("../../../database/migrations/sqlite/0002_github_provider_account.sql");
-    let oauth_migration = include_str!("../../../database/migrations/sqlite/0003_github_oauth_pending.sql");
-    let integrity_migration =
-        include_str!("../../../database/migrations/sqlite/0004_github_referential_integrity.sql");
-    for script in [baseline, migration, oauth_migration, integrity_migration] {
-        for statement in script.split(';').map(str::trim).filter(|value| !value.is_empty()) {
-            sqlx::query(statement)
-                .execute(sqlite)
-                .await
-                .expect("execute schema statement");
-        }
+    let baseline = include_str!("../../../database/ddl/baseline/sqlite/0001_github_baseline.sql");
+    for statement in baseline.split(';').map(str::trim).filter(|value| !value.is_empty()) {
+        sqlx::query(statement)
+            .execute(sqlite)
+            .await
+            .expect("execute schema statement");
     }
 }
 
